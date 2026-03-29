@@ -28,6 +28,8 @@ public class Admin {
     this.password = password;
   }
 
+  protected Admin(){}
+
   // Getters and Setters
   public Long getId() {
     return id;

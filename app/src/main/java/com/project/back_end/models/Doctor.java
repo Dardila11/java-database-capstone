@@ -25,20 +25,25 @@ public class Doctor {
   @NotNull(message = "Name is required")
   @Size(min = 3, max = 100)
   private String name;
+  
   @NotNull(message = "Specialty is required")
   @Size(min = 3, max = 50)
   private String specialty;
+  
   @NotNull(message = "Email is required")
   @Email(message = "Invalid email format")
   private String email;
+  
   @NotNull(message = "Password is required")
   @Size(min = 6)
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String password;
+  
   @NotNull(message = "Phone is required")
   @Size(min = 12, max = 12)
   @Pattern(regexp = "^[0-9]{10}$", message = "Invalid phone number format")
   private String phone;
+  
   @ElementCollection
   // Each time slot is represented as a string (e.g., "09:00-10:00", "10:00-11:00").
   // ensures that the list of available times is stored as a separate collection in the database.

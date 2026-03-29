@@ -1,20 +1,23 @@
 package com.project.back_end.models;
 
-import java.beans.Transient;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-(name = "appointments")
+(name = "appointment")
 public class Appointment {
 
   @Id
@@ -24,15 +27,19 @@ public class Appointment {
   @ManyToOne
   // indicates many appointments can be linked to one doctor.
   @NotNull(message = "Doctor is required")
+  @JoinColumn(name = "doctor_id")
   private Doctor doctor;
 
   @ManyToOne
   // indicates many appointments can be linked to one patient.
   @NotNull(message = "Patient is required")
+  @JoinColumn(name = "patient_id")
   private Patient patient;
   @Future(message = "Appointment time must be in the future")
   @NotNull(message = "Appointment time is required")
+  @Column(name = "appointment_time")
   private LocalDateTime appointmentTime;
+
   @NotNull(message = "Status is required")
   // 0 means the appointment is scheduled.
   // 1 means the appointment has been completed.
@@ -62,6 +69,9 @@ public class Appointment {
     this.appointmentTime = appointmentTime;
     this.status = status;
   }
+
+  protected Appointment() {}
+
 
   // getters
   public Long getId() {

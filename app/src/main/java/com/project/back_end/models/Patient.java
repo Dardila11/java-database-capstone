@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Entity
-(name = "patients")
+(name = "patient")
 public class Patient {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +32,7 @@ public class Patient {
   private String password;
   
   @NotNull(message = "Phone is required")
-  @Size(min = 10, max = 10)
+  @Size(min = 10, max = 12)
   @Pattern(regexp = "^[0-9]{10}$", message = "Invalid phone number format")
   private String phone;
   
