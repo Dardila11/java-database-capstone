@@ -3,17 +3,14 @@
 ### Table: patients
 
 - id: INT, Primary Key, Auto Increment
-- first_name: VARCHAR(), Not Null
-- last_name: VARCHAR(), Not Null
-- dob: DATETIME, Not Null
+- name: VARCHAR(), Not Null
 - email: VARCHAR(255), Not Null, Unique
 - password: VARCHAR(255), Not Null
-- phone_number: VARCHAR(20), null
+- phone: VARCHAR(20), null
 - gender: VARCHAR(20), Null
 - blood_group: VARCHAR(10), Null
 - allergies: VARCHAR(1000), Null
-- emergency_contact_name: VARCHAR(200), Null
-- emergency_contact_phone: VARCHAR(20), Null
+- address: VARCHAR(255), Null
 - is_active: BOOLEAN, Not Null, Default = TRUE
 - created_at: DATETIME, Not Null, Default = CURRENT_TIMESTAMP
 
