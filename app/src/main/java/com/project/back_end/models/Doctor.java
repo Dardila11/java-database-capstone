@@ -15,7 +15,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Entity
-(name = "doctors")
+(name = "doctor")
 public class Doctor {
 
   @Id
@@ -36,7 +36,7 @@ public class Doctor {
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String password;
   @NotNull(message = "Phone is required")
-  @Size(min = 10, max = 10)
+  @Size(min = 12, max = 12)
   @Pattern(regexp = "^[0-9]{10}$", message = "Invalid phone number format")
   private String phone;
   @ElementCollection
