@@ -1,6 +1,23 @@
 package com.project.back_end.controllers;
 
+import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.models.Appointment;
+import com.project.back_end.services.AppointmentService;
+import com.project.back_end.services.Service;
+import com.project.back_end.services.TokenService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/appointments")
 public class AppointmentController {
 
 // 1. Set Up the Controller Class:
@@ -13,13 +30,36 @@ public class AppointmentController {
 //    - Inject `AppointmentService` for handling the business logic specific to appointments.
 //    - Inject the general `Service` class, which provides shared functionality like token validation and appointment checks.
 
+    private final AppointmentService appointmentService;
+    private final Service service;
 
+
+    public AppointmentController(AppointmentService appointmentService, Service service) {
+        this.appointmentService = appointmentService;
+        this.service = service;
+    }
 // 3. Define the `getAppointments` Method:
 //    - Handles HTTP GET requests to fetch appointments based on date and patient name.
 //    - Takes the appointment date, patient name, and token as path variables.
 //    - First validates the token for role `"doctor"` using the `Service`.
 //    - If the token is valid, returns appointments for the given patient on the specified date.
 //    - If the token is invalid or expired, responds with the appropriate message and status code.
+
+    @GetMapping("/{date}/{patientName}/{token}")
+    public ResponseEntity<Map<String, Object>> getAppointments(
+            @PathVariable String date,
+            @PathVariable String patientName,
+            @PathVariable String token) {
+
+        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "doctor");
+        if (tokenValidation.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(tokenValidation.getStatusCode())
+                    .body(Map.of("error", tokenValidation.getBody().get("error")));
+        }
+        List<AppointmentDTO> appointments = appointmentService.getAppointments(date, patientName, token);
+        return ResponseEntity.ok(Map.of("appointments", appointments));
+    }
+
 
 
 // 4. Define the `bookAppointment` Method:
