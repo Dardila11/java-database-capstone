@@ -49,18 +49,6 @@ public class Doctor {
   // ensures that the list of available times is stored as a separate collection in the database.
   private List<String> availableTimes;
 
-  // constructors
-  public Doctor(String name, String specialty, String email, String password, String phone, List<String> availableTimes) {
-    this.name = name;
-    this.specialty = specialty;
-    this.email = email;
-    this.password = password;
-    this.phone = phone;
-    this.availableTimes = availableTimes;
-  }
-  public Doctor() {
-  }
-
   // getters
   public Long getId() {
     return id;

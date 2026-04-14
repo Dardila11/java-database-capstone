@@ -40,19 +40,6 @@ public class DoctorController {
         this.service = service;
     }
 
-    private ResponseEntity<Map<String, String>> validateTokenRole(String token, String role) {
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, role);
-        if (tokenValidation.getStatusCode() != HttpStatus.OK) {
-            assert tokenValidation.getBody() != null;
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
-        return null;
-
-    }
-
-
-
 // 3. Define the `getDoctorAvailability` Method:
 //    - Handles HTTP GET requests to check a specific doctor’s availability on a given date.
 //    - Requires `user` type, `doctorId`, `date`, and `token` as path variables.
@@ -98,7 +85,8 @@ public class DoctorController {
             @PathVariable String token
     ){
         // validate token
-        ResponseEntity<Map<String, String>> tokenValidation = validateTokenRole(token, "admin");
+        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
+
         if (tokenValidation != null) {
             assert tokenValidation.getBody() != null;
             return ResponseEntity.status(tokenValidation.getStatusCode())
@@ -122,7 +110,7 @@ public class DoctorController {
 //    - Delegates authentication to the `DoctorService` and returns login status and token information.
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> doctorLogin(@RequestBody Login login) {
+    public ResponseEntity<Map<String, String>> doctorLogin(@RequestBody Login login) {
         return doctorService.validateDoctor(login);
     }
 
@@ -167,10 +155,11 @@ public class DoctorController {
             @PathVariable long id,
             @PathVariable String token
     ) {
-        ResponseEntity<Map<String, String>> tokenValidation = validateTokenRole(token, "admin");
+        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
         if (tokenValidation != null) {
             assert tokenValidation.getBody() != null;
-            return ResponseEntity.status(tokenValidation.getStatusCode()).body(Map.of("error", tokenValidation.getBody().get("error")));
+            return ResponseEntity.status(tokenValidation.getStatusCode())
+                    .body(Map.of("error", "token is invalid"));
         }
         int deleteResult = doctorService.deleteDoctor(id);
         return switch (deleteResult) {

@@ -35,6 +35,7 @@ public class Appointment {
   @NotNull(message = "Patient is required")
   @JoinColumn(name = "patient_id")
   private Patient patient;
+
   @Future(message = "Appointment time must be in the future")
   @NotNull(message = "Appointment time is required")
   @Column(name = "appointment_time")
@@ -61,17 +62,6 @@ public class Appointment {
   private LocalTime getAppointmentTimeOnly() {
     return appointmentTime.toLocalTime();
   }
-
-  // constructor
-  public Appointment(Doctor doctor, Patient patient, LocalDateTime appointmentTime, int status) {
-    this.doctor = doctor;
-    this.patient = patient;
-    this.appointmentTime = appointmentTime;
-    this.status = status;
-  }
-
-  protected Appointment() {}
-
 
   // getters
   public Long getId() {

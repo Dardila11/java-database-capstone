@@ -30,8 +30,8 @@ window.adminLoginHandler = async () => {
     });
 
     if (response.ok) {
-      const token = await response.json();
-      localStorage.setItem("token", token);
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
       selectRole("admin");
     } else {
       alert("Invalid admin credentials. Please try again.");
@@ -54,8 +54,10 @@ window.doctorLoginHandler = async () => {
     });
 
     if (response.ok) {
-      const token = await response.json();
-      localStorage.setItem("token", token);
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
+
+      console.log(data.token)
       selectRole("doctor");
     } else {
       alert("Invalid doctor credentials. Please try again.");

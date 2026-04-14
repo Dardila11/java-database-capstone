@@ -40,17 +40,6 @@ public class Patient {
   @Size(max = 255)
   private String address;
 
-  // constructors
-  public Patient(String name, String email, String password, String phone, String address) {
-    this.name = name;
-    this.email = email;
-    this.password = password;
-    this.phone = phone;
-    this.address = address;
-  }
-  public Patient() {
-  }
-
   // getters
   public Long getId() {
     return id;

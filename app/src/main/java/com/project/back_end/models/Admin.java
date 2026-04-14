@@ -23,13 +23,6 @@ public class Admin {
   @NotNull(message = "Password is required")
   private String password;
 
-  public Admin(String username, String password) {
-    this.username = username;
-    this.password = password;
-  }
-
-  protected Admin(){}
-
   // Getters and Setters
   public Long getId() {
     return id;

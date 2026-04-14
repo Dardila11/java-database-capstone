@@ -13,7 +13,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     Doctor findByEmail(String email);
 
-    @Query("SELECT d FROM Doctor d WHERE d.name LIKE CONCAT('%', :name, '%')")
+    @Query("SELECT d FROM doctor d WHERE d.name LIKE CONCAT('%', :name, '%')")
     List<Doctor> findByNameLike(String name);
 
     List<Doctor> findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(String name, String specialty);

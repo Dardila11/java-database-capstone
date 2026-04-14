@@ -1,5 +1,7 @@
 // header.js
 
+import {openModal} from "./modals";
+
 function renderHeader() {
   const headerDiv = document.getElementById("header");
 
