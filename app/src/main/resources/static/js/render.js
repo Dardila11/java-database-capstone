@@ -3,18 +3,16 @@
 function selectRole(role) {
   setRole(role);
   const token = localStorage.getItem('token');
-  if (role === "admin") {
-    if (token) {
-      window.location.href = `/adminDashboard/${token}`;
-    }
-  } if (role === "patient") {
-    window.location.href = "/pages/patientDashboard.html";
-  } else if (role === "doctor") {
-    if (token) {
-      window.location.href = `/doctorDashboard/${token}`;
-    } else if (role === "loggedPatient") {
-      window.location.href = "loggedPatientDashboard.html";
-    }
+  const routes = {
+    admin: token ? `/adminDashboard/${token}` : null,
+    doctor: token ? `/doctorDashboard/${token}` : null,
+    patient: "/pages/patientDashboard.html",
+    loggedPatient: "loggedPatientDashboard.html"
+  };
+
+  const target = routes[role];
+  if (target) {
+    window.location.href = target;
   }
 }
 
@@ -22,7 +20,6 @@ function selectRole(role) {
 function renderContent() {
   const role = getRole();
   if (!role) {
-    window.location.href = "/"; // if no role, send to role selection page
-    return;
+    window.location.href = "/";
   }
 }

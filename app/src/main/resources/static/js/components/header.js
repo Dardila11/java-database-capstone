@@ -1,6 +1,9 @@
 // header.js
 
+import {openModal} from "./modals.js";
+
 const headerContainer = document.getElementById("header");
+const logoPath = "../assets/images/logo/logo.png";
 
 function getLogoPath() {
   const isRoot = window.location.pathname === "/" || window.location.pathname.endsWith("/index.html");
@@ -14,7 +17,7 @@ function logout() {
 }
 
 function logoutPatient() {
-  localStorage.removeItem("userRole");
+  localStorage.setItem("userRole", "patient");
   localStorage.removeItem("token");
   window.location.href = "/pages/patientDashboard.html";
 }
@@ -111,6 +114,7 @@ function renderHeader() {
     return; // Stop rendering if session is invalid and redirection is happening
   }
 
+  // if a role is logged in
   const navContent = getHeaderNavContent(role);
 
   const headerHTML = `
