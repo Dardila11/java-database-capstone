@@ -9,9 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Map;
 
 @RestController
@@ -67,7 +65,7 @@ public class DoctorController {
 //    - Handles HTTP GET requests to retrieve a list of all doctors.
 //    - Returns the list within a response map under the key `"doctors"` with HTTP 200 OK status.
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<Map<String, Object>> getDoctor(){
         return ResponseEntity.ok(Map.of("doctors", doctorService.getDoctors()));
 
