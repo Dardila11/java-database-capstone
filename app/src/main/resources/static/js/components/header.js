@@ -3,8 +3,6 @@
 import {openModal} from "./modals.js";
 
 const headerContainer = document.getElementById("header");
-const logoPath = "../assets/images/logo/logo.png";
-
 function getLogoPath() {
   const isRoot = window.location.pathname === "/" || window.location.pathname.endsWith("/index.html");
   return isRoot ? "assets/images/logo/logo.png" : "../assets/images/logo/logo.png";
@@ -91,7 +89,6 @@ function renderHeader() {
   if (!headerContainer) return;
 
   const isRoot = window.location.pathname.endsWith("/");
-    console.log(isRoot)
   const logoPath = getLogoPath();
 
   if (isRoot) {

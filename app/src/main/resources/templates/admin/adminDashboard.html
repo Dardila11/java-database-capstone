@@ -9,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/assets/css/style.css}" />
     <script th:src="@{/js/render.js}" defer></script>
     <script th:src="@{/js/util.js}" defer></script>
+    <script th:src="@{/js/components/modals.js}" defer></script>
     <script type="module" th:src="@{/js/components/header.js}" defer></script>
     <script type="module" th:src="@{/js/components/footer.js}" defer></script>
   </head>
@@ -17,19 +18,19 @@
       <div class="wrapper">
         <div id="header"></div>
         <main class="main-content">
-          <input
+          <label for="searchBar"></label><input
             type="text"
             id="searchBar"
             class="searchBar"
             placeholder="Search doctors by name..."
           />
           <div class="filters">
-            <select id="timeFilter">
+            <label for="timeFilter"></label><select id="timeFilter">
               <option value="">All Times</option>
               <option value="AM">AM</option>
               <option value="PM">PM</option>
             </select>
-            <select id="specialtyFilter">
+            <label for="specialtyFilter"></label><select id="specialtyFilter">
               <option value="">All Specialties</option>
               <option value="Cardiologist">Cardiologist</option>
               <option value="Dentist">Dentist</option>

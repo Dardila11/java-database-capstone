@@ -3,20 +3,8 @@ import { getDoctors, filterDoctors, saveDoctor } from "./services/doctorServices
 import { createDoctorCard } from "./components/doctorCard.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const addDocBtn = document.getElementById("addDocBtn");
-  if (addDocBtn) {
-    addDocBtn.addEventListener("click", () => openModal("addDoctor"));
-  }
-
+  document.getElementById("addDocBtn").addEventListener("click", () => openModal("addDoctor"));
   await loadDoctorCards();
-
-  const searchBar = document.getElementById("searchBar");
-  const timeFilter = document.getElementById("timeFilter");
-  const specialtyFilter = document.getElementById("specialtyFilter");
-
-  searchBar.addEventListener("input", filterDoctorsOnChange);
-  timeFilter.addEventListener("change", filterDoctorsOnChange);
-  specialtyFilter.addEventListener("change", filterDoctorsOnChange);
 });
 
 async function loadDoctorCards() {
@@ -30,11 +18,20 @@ async function loadDoctorCards() {
   } catch (error) {
     console.error("Error loading doctor cards:", error);
   }
+
+  const searchBar = document.getElementById("searchBar");
+  const timeFilter = document.getElementById("timeFilter");
+  const specialtyFilter = document.getElementById("specialtyFilter");
+
+  searchBar.addEventListener("input", filterDoctorsOnChange);
+  timeFilter.addEventListener("change", filterDoctorsOnChange);
+  specialtyFilter.addEventListener("change", filterDoctorsOnChange);
 }
 
 async function filterDoctorsOnChange() {
   try {
     const name = document.getElementById("searchBar").value.trim() || null;
+    console.log(name)
     const time = document.getElementById("timeFilter").value || null;
     const specialty = document.getElementById("specialtyFilter").value || null;
 
@@ -62,6 +59,7 @@ function renderDoctorCards(doctors) {
 
 window.adminAddDoctor = async function () {
   const name = document.getElementById("doctorName").value.trim();
+  console.log(name)
   const email = document.getElementById("doctorEmail").value.trim();
   const phone = document.getElementById("doctorPhone").value.trim();
   const password = document.getElementById("doctorPassword").value.trim();
@@ -79,10 +77,13 @@ window.adminAddDoctor = async function () {
   const doctor = { name, email, phone, password, specialty, availableTimes };
 
   const { success, message } = await saveDoctor(doctor, token);
-  alert(message);
 
   if (success) {
+    alert(message);
     document.getElementById("modal").style.display = "none";
     location.reload();
+  } else
+  {
+    alert(message);
   }
 };

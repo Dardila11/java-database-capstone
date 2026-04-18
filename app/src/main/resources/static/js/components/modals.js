@@ -1,4 +1,5 @@
 // modals.js
+
 export function openModal(type) {
   let modalContent = '';
   if (type === 'addDoctor') {
@@ -7,20 +8,20 @@ export function openModal(type) {
          <input type="text" id="doctorName" placeholder="Doctor Name" class="input-field">
          <select id="specialization" class="input-field select-dropdown">
              <option value="">Specialization</option>
-                        <option value="cardiologist">Cardiologist</option>
-                        <option value="dermatologist">Dermatologist</option>
-                        <option value="neurologist">Neurologist</option>
-                        <option value="pediatrician">Pediatrician</option>
-                        <option value="orthopedic">Orthopedic</option>
-                        <option value="gynecologist">Gynecologist</option>
-                        <option value="psychiatrist">Psychiatrist</option>
-                        <option value="dentist">Dentist</option>
-                        <option value="ophthalmologist">Ophthalmologist</option>
-                        <option value="ent">ENT Specialist</option>
-                        <option value="urologist">Urologist</option>
-                        <option value="oncologist">Oncologist</option>
-                        <option value="gastroenterologist">Gastroenterologist</option>
-                        <option value="general">General Physician</option>
+             <option value="cardiologist">Cardiologist</option>
+             <option value="dermatologist">Dermatologist</option>
+             <option value="neurologist">Neurologist</option>
+             <option value="pediatrician">Pediatrician</option>
+             <option value="orthopedic">Orthopedic</option>
+             <option value="gynecologist">Gynecologist</option>
+             <option value="psychiatrist">Psychiatrist</option>
+             <option value="dentist">Dentist</option>
+             <option value="ophthalmologist">Ophthalmologist</option>
+             <option value="ent">ENT Specialist</option>
+             <option value="urologist">Urologist</option>
+             <option value="oncologist">Oncologist</option>
+             <option value="gastroenterologist">Gastroenterologist</option>
+             <option value="general">General Physician</option>
 
         </select>
         <input type="email" id="doctorEmail" placeholder="Email" class="input-field">
