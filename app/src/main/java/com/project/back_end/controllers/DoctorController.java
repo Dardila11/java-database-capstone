@@ -84,13 +84,10 @@ public class DoctorController {
     ){
         // validate token
         ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
-
-        System.out.println(tokenValidation);
         if((tokenValidation == null) || (tokenValidation.getBody() == null)){
             return ResponseEntity.status(tokenValidation.getStatusCode())
                     .body(Map.of("error", tokenValidation.getBody().get("error")));
         }
-
         int saveResult = doctorService.saveDoctor(doctor);
         return switch (saveResult) {
             case -1 -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "doctor already exists"));
@@ -125,11 +122,9 @@ public class DoctorController {
                 @PathVariable String token
         ){
             ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
-            if (tokenValidation != null) {
-                assert tokenValidation.getBody() != null;
+            if((tokenValidation == null) || (tokenValidation.getBody() == null)){
                 return ResponseEntity.status(tokenValidation.getStatusCode())
-                        .body(Map.of("error", "token is invalid"));
-
+                        .body(Map.of("error", tokenValidation.getBody().get("error")));
             }
             int updateResult = doctorService.updateDoctor(doctor);
             return switch (updateResult) {
@@ -154,10 +149,9 @@ public class DoctorController {
             @PathVariable String token
     ) {
         ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
-        if (tokenValidation != null) {
-            assert tokenValidation.getBody() != null;
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
             return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", "token is invalid"));
+                    .body(Map.of("error", tokenValidation.getBody().get("error")));
         }
         int deleteResult = doctorService.deleteDoctor(id);
         return switch (deleteResult) {

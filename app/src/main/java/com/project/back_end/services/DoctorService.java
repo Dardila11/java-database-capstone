@@ -96,6 +96,7 @@ public class DoctorService {
       doctorRepository.deleteById(doctorId);
       return 1;
     } catch (Exception e) {
+      System.out.println(e.getMessage());
       return 0;
     }
   }
@@ -116,7 +117,7 @@ public class DoctorService {
 
       return ResponseEntity.ok(response);
     } catch (Exception e) {
-      response.put("message", "Internal server error");
+      System.out.println(e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }

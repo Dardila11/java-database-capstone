@@ -44,8 +44,12 @@ export function createDoctorCard(doctor) {
     deleteBtn.addEventListener("click", async () => {
       const token = localStorage.getItem("token")
       const { success, message } = await deleteDoctor(doctor.id, token)
-      alert(message)
-      if (success) card.remove()
+      if(success){
+        alert("Doctor deleted successfully")
+        card.remove();
+      } else {
+        alert("Error while deleting doctor:" + message)
+      }
     })
 
     actionsDiv.appendChild(deleteBtn)
