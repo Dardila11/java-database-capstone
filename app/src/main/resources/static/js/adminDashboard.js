@@ -1,11 +1,8 @@
-import { openModal } from "./components/modals.js";
 import { getDoctors, filterDoctors, saveDoctor } from "./services/doctorServices.js";
 import { createDoctorCard } from "./components/doctorCard.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("addDocBtn").addEventListener("click", () => openModal("addDoctor"));
-  await loadDoctorCards();
-});
+await loadDoctorCards();
+
 
 async function loadDoctorCards() {
   try {
