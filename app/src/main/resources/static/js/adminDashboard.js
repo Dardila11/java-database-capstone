@@ -56,7 +56,6 @@ function renderDoctorCards(doctors) {
 
 window.adminAddDoctor = async function () {
   const name = document.getElementById("doctorName").value.trim();
-  console.log(name)
   const email = document.getElementById("doctorEmail").value.trim();
   const phone = document.getElementById("doctorPhone").value.trim();
   const password = document.getElementById("doctorPassword").value.trim();
@@ -76,11 +75,11 @@ window.adminAddDoctor = async function () {
   const { success, message } = await saveDoctor(doctor, token);
 
   if (success) {
-    alert(message);
+    alert("Doctor added successfully");
     document.getElementById("modal").style.display = "none";
     location.reload();
   } else
   {
-    alert(message);
+    alert("Error while adding doctor:");
   }
 };

@@ -40,7 +40,7 @@ public class Doctor {
   private String password;
   
   @NotNull(message = "Phone is required")
-  @Size(min = 12, max = 12)
+  @Size(min = 10, max = 12)
   @Pattern(regexp = "^[0-9]{10}$", message = "Invalid phone number format")
   private String phone;
   

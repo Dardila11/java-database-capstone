@@ -63,6 +63,7 @@ public class DoctorService {
       doctorRepository.save(doctor);
       return 1;
     } catch (Exception e) {
+      System.out.println(e.getMessage());
       return 0;
     }
   }

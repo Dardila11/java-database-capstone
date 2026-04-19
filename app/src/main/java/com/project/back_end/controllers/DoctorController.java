@@ -85,8 +85,8 @@ public class DoctorController {
         // validate token
         ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
 
-        if (tokenValidation != null) {
-            assert tokenValidation.getBody() != null;
+        System.out.println(tokenValidation);
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
             return ResponseEntity.status(tokenValidation.getStatusCode())
                     .body(Map.of("error", tokenValidation.getBody().get("error")));
         }
