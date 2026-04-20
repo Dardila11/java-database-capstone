@@ -76,7 +76,7 @@ function attachEventListeners() {
     if (patientSignupBtn) patientSignupBtn.addEventListener("click", () => openModal('patientSignup'));
 
     const patientHomeBtn = document.getElementById("patientHomeBtn");
-    if (patientHomeBtn) patientHomeBtn.addEventListener("click", () => window.location.href='/pages/loggedPatientDashboard.html');
+    if (patientHomeBtn) patientHomeBtn.addEventListener("click", () => window.location.href='../../../templates/loggedPatient/loggedPatientDashboard.html');
 
     const patientAppointmentsBtn = document.getElementById("patientAppointmentsBtn");
     if (patientAppointmentsBtn) patientAppointmentsBtn.addEventListener("click", () => window.location.href='/pages/patientAppointments.html');

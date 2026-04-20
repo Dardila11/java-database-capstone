@@ -27,20 +27,6 @@ export async function patientSignup(data) {
   }
 }
 
-//For logging in patient
-export async function patientLogin(data) {
-  console.log("patientLogin :: ", data)
-  return await fetch(`${PATIENT_API}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  });
-
-
-}
-
 // For getting patient data (name ,id , etc ). Used in booking appointments
 export async function getPatientData(token) {
   try {

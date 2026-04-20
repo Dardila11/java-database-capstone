@@ -7,7 +7,7 @@ function selectRole(role) {
     admin: token ? `/adminDashboard/${token}` : null,
     doctor: token ? `/doctorDashboard/${token}` : null,
     patient: "/pages/patientDashboard.html",
-    loggedPatient: "loggedPatientDashboard.html"
+    loggedPatient: token ? `/loggedPatientDashboard/${token}`  : null
   };
 
   const target = routes[role];

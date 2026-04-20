@@ -4,10 +4,7 @@ import { createDoctorCard } from './components/doctorCard.js';
 import { filterDoctors } from './services/doctorServices.js';
 import { bookAppointment } from './services/appointmentRecordService.js';
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadDoctorCards();
-});
+loadDoctorCards();
 
 function loadDoctorCards() {
   getDoctors()

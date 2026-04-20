@@ -3,16 +3,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../assets/images/logo/logo.png" />
+    <link rel="icon" type="image/png" th:href="@{/assets/images/logo/logo.png}" />
     <title>LoggedPatientDashboard</title>
-    <link rel = "stylesheet" href = "../assets/css/adminDashboard.css">
-    <link rel = "stylesheet" href = "../assets/css/style.css">
-    <link rel = "stylesheet" href = "../assets/css/patientDashboard.css">
-    <script src = "../js/render.js" defer></script>
-    <script src = "../js/util.js" defer></script>
-    <script src = "../js/components/header.js" defer></script>
-    <script src = "../js/components/footer.js" defer></script>
-    <script type = "module" src = "../js/loggedPatient.js" defer></script>
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/patientDasboard.css}" />
+    <script th:src="@{/js/render.js}" defer></script>
+    <script th:src="@{/js/util.js}" defer></script>
+
+    <script type="module" th:src="@{/js/components/header.js}" defer></script>
+    <script type="module" th:src="@{/js/components/footer.js}" defer></script>
+    <script type="module" th:src="@{/js/loggedPatient.js}" defer></script>
 </head>
 <body onload="renderContent()">
     <div class="container">

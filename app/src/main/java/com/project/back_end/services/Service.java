@@ -123,8 +123,11 @@ public class Service {
     public ResponseEntity<Map<String, String>> validatePatientLogin(String email, String password) {
         try {
             Patient patient = patientRepository.findByEmail(email);
-            if (patient == null || !patient.getPassword().equals(password)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid email or password"));
+            if (patient == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Patient not found"));
+            }
+            if (!patient.getPassword().equals(password)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid password"));
             }
             String token = tokenService.generateToken(patient.getEmail());
             return ResponseEntity.ok(Map.of("token", token));
@@ -134,7 +137,7 @@ public class Service {
     }
 
 // 9. **filterPatient Method**
-// This method filters a patient's appointment history based on condition and doctor name.
+// This method filters a patient's appointment history based on condition and Doctor name.
 // - It extracts the email from the JWT token to identify the patient.
 // - Depending on which filters (condition, doctor name) are provided, it delegates the filtering logic to PatientService.
 // - If no filters are provided, it retrieves all appointments for the patient.
