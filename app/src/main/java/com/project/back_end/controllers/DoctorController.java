@@ -51,8 +51,7 @@ public class DoctorController {
             @PathVariable String token
     ){
         ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, user);
-        if (tokenValidation != null) {
-            assert tokenValidation.getBody() != null;
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
             return ResponseEntity.status(tokenValidation.getStatusCode())
                     .body(Map.of("error", tokenValidation.getBody().get("error")));
         }

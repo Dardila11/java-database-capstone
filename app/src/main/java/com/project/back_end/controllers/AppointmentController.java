@@ -34,16 +34,6 @@ public class AppointmentController {
         this.service = service;
     }
 
-    private ResponseEntity<Map<String, String>> validateTokenRole(String token, String role) {
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, role);
-        if (tokenValidation.getStatusCode() != HttpStatus.OK) {
-            assert tokenValidation.getBody() != null;
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
-        return null;
-    }
-
 // 3. Define the `getAppointments` Method:
 //    - Handles HTTP GET requests to fetch appointments based on date and patient name.
 //    - Takes the appointment date, patient name, and token as path variables.
@@ -57,11 +47,11 @@ public class AppointmentController {
             @PathVariable String patientName,
             @PathVariable String token) {
 
-        ResponseEntity<Map<String, String>> tokenError = validateTokenRole(token, "doctor");
-        if (tokenError != null) {
-            assert tokenError.getBody() != null;
-            return ResponseEntity.status(tokenError.getStatusCode())
-                    .body(Map.of("error", tokenError.getBody().get("error")));
+        // validate token
+        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "user");
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
+            return ResponseEntity.status(tokenValidation.getStatusCode())
+                    .body(Map.of("error", tokenValidation.getBody().get("error")));
         }
         List<AppointmentDTO> appointments = appointmentService.getAppointments(date, patientName, token);
         return ResponseEntity.ok(Map.of("appointments", appointments));
@@ -80,8 +70,12 @@ public class AppointmentController {
             @RequestBody Appointment appointment,
             @PathVariable String token) {
 
-        ResponseEntity<Map<String, String>> tokenError = validateTokenRole(token, "patient");
-        if (tokenError != null) return tokenError;
+        // validate token
+        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
+            return ResponseEntity.status(tokenValidation.getStatusCode())
+                    .body(Map.of("error", tokenValidation.getBody().get("error")));
+        }
 
         if (appointment.getDoctor() == null || appointment.getAppointmentTime() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Doctor and appointment time are required"));
@@ -114,8 +108,12 @@ public class AppointmentController {
             @RequestBody Appointment appointment,
             @PathVariable String token
     ){
-        ResponseEntity<Map<String, String>> tokenError = validateTokenRole(token, "patient");
-        if (tokenError != null) return tokenError;
+        // validate token
+        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
+            return ResponseEntity.status(tokenValidation.getStatusCode())
+                    .body(Map.of("error", tokenValidation.getBody().get("error")));
+        }
 
         int updateResult = appointmentService.updateAppointment(appointment, token);
         return switch (updateResult) {
@@ -143,8 +141,12 @@ public class AppointmentController {
             @PathVariable long id,
             @PathVariable String token
     ){
-        ResponseEntity<Map<String, String>> tokenError = validateTokenRole(token, "patient");
-        if (tokenError != null) return tokenError;
+        // validate token
+        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
+            return ResponseEntity.status(tokenValidation.getStatusCode())
+                    .body(Map.of("error", tokenValidation.getBody().get("error")));
+        }
 
         // Returns: 1 = success, 0 = failure, -1 = not found, -2 = unauthorized.
         int cancelResult = appointmentService.cancelAppointment(id, token);

@@ -85,6 +85,7 @@ public class AppointmentService {
       appointmentRepository.save(existing);
       return 1;
     } catch (Exception e) {
+      System.out.println(e.getMessage());
       return 0;
     }
   }
@@ -109,6 +110,7 @@ public class AppointmentService {
       appointmentRepository.deleteById(appointmentId);
       return 1;
     } catch (Exception e) {
+      System.out.println(e.getMessage());
       return 0;
     }
   }
@@ -126,7 +128,7 @@ public class AppointmentService {
     LocalDateTime end = localDate.atTime(LocalTime.MAX);
 
     List<Appointment> appointments;
-    if (patientName == null || patientName.isBlank()) {
+    if (patientName.equals("null")) {
       appointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end);
     } else {
       appointments = appointmentRepository
