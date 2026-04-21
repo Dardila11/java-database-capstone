@@ -118,20 +118,14 @@ public class PatientService {
         }
     }
 
-    public ResponseEntity<Map<String, Object>> getPatientDetails(String token) {
-        Map<String, Object> response = new HashMap<>();
+
+    ///  Return Patient or null
+    public Patient getPatientDetails(String token) {
         try {
             String email = tokenService.extractEmail(token);
-            Patient patient = patientRepository.findByEmail(email);
-            if (patient == null) {
-                response.put("message", "Patient not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-            response.put("patient", patient);
-            return ResponseEntity.ok(response);
+            return patientRepository.findByEmail(email);
         } catch (Exception e) {
-            response.put("message", "Internal server error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return null;
         }
     }
 }

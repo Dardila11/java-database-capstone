@@ -1,6 +1,7 @@
 // patientServices
 import { API_BASE_URL } from "../config/config.js";
 const PATIENT_API = API_BASE_URL + '/patient'
+const DOCTOR_API = API_BASE_URL + '/doctor'
 
 
 //For creating a patient in db
@@ -41,9 +42,10 @@ export async function getPatientData(token) {
 }
 
 // the Backend API for fetching the patient record(visible in Doctor Dashboard) and Appointments (visible in Patient Dashboard) are same based on user(patient/doctor).
-export async function getPatientAppointments(id, token, user) {
+export async function getPatientAppointments(id, token, user)
+{
   try {
-    const response = await fetch(`${PATIENT_API}/${id}/${user}/${token}`);
+    const response = await fetch(`${PATIENT_API}/${id}/${token}`);
     const data = await response.json();
     console.log(data.appointments)
     if (response.ok) {

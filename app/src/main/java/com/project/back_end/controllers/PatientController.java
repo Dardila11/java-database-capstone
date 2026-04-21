@@ -5,6 +5,7 @@ import com.project.back_end.DTO.Login;
 import com.project.back_end.services.PatientService;
 import com.project.back_end.services.Service;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +26,16 @@ public class PatientController {
     @GetMapping("/{token}")
     public ResponseEntity<Map<String, Object>> getPatient(@PathVariable String token) {
         ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if (tokenValidation != null) {
-            assert tokenValidation.getBody() != null;
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
             return ResponseEntity.status(tokenValidation.getStatusCode())
                     .body(Map.of("error", tokenValidation.getBody().get("error")));
         }
+        Patient patientDetails = patientService.getPatientDetails(token);
+        if (patientDetails == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Patient not found"));
+        }
 
-        return ResponseEntity.ok(Map.of("patient details", patientService.getPatientDetails(token)));
+        return ResponseEntity.ok(Map.of("patient", patientDetails));
     }
 
     @PostMapping("/create")
@@ -52,11 +56,10 @@ public class PatientController {
         return service.validatePatientLogin(loginDTO.getEmail(), loginDTO.getPassword());
     }
 
-    @GetMapping("/appointments/{id}/{token}")
+    @GetMapping("/{id}/{token}")
     public ResponseEntity<Map<String, Object>> getPatientAppointment(@PathVariable long id, @PathVariable String token) {
         ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if (tokenValidation != null) {
-            assert tokenValidation.getBody() != null;
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
             return ResponseEntity.status(tokenValidation.getStatusCode())
                     .body(Map.of("error", tokenValidation.getBody().get("error")));
         }
@@ -70,8 +73,7 @@ public class PatientController {
             @PathVariable String name,
             @PathVariable String token) {
         ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if (tokenValidation != null) {
-            assert tokenValidation.getBody() != null;
+        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
             return ResponseEntity.status(tokenValidation.getStatusCode())
                     .body(Map.of("error", tokenValidation.getBody().get("error")));
         }
