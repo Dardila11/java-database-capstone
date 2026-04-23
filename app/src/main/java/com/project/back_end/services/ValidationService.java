@@ -1,5 +1,6 @@
 package com.project.back_end.services;
 
+import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.models.Admin;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
@@ -7,6 +8,8 @@ import com.project.back_end.repo.AdminRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class ValidationService {
@@ -33,21 +36,29 @@ public class ValidationService {
     }
 
     /// Validates patient credentials
-    public boolean validatePatientLogin(String email, String password) {
+    public String validatePatientLogin(String email, String password) {
         Patient patient = patientRepository.findByEmail(email);
-        return patient != null && patient.getPassword().equals(password);
+        if (patient == null || !patient.getPassword().equals(password)) {
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+        return tokenService.generateToken(patient.getEmail());
     }
 
     /// Validates admin credentials
-    public boolean validateAdminLogin(String username, String password){
+    public String validateAdminLogin(String username, String password){
         Admin admin = adminRepository.findByUsername(username);
-        return admin != null && admin.getPassword().equals(password);
+        if(admin == null || !admin.getPassword().equals(password)){
+            throw new InvalidCredentialsException("Invalid username or password");
+        }
+        return tokenService.generateToken(admin.getUsername());
     }
 
     /// Validates doctor credentials
-    public boolean validateDoctorLogin(String email, String password){
+    public String validateDoctorLogin(String email, String password){
         Doctor doctor = doctorRepository.findByEmail(email);
-        return doctor != null && doctor.getPassword().equals(password);
+        if(doctor == null || !doctor.getPassword().equals(password)){
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+        return tokenService.generateToken(doctor.getEmail());
     }
-
 }
