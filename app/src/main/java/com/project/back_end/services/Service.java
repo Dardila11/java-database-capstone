@@ -90,31 +90,6 @@ public class Service {
         return patientRepository.findByEmailOrPhone(email, phone) == null;
     }
 
-
-// 8. **validatePatientLogin Method**
-// This method handles login validation for patient users.
-// - It looks up the patient by email.
-// - If found, it checks whether the provided password matches the stored one.
-// - On successful validation, it generates a JWT token and returns it with a 200 OK status.
-// - If the password is incorrect or the patient doesn't exist, it returns a 401 Unauthorized with a relevant error.
-// - If an exception occurs, it returns a 500 Internal Server Error.
-// This method ensures only legitimate patients can log in and access their data securely.
-    public ResponseEntity<Map<String, String>> validatePatientLogin(String email, String password) {
-        try {
-            Patient patient = patientRepository.findByEmail(email);
-            if (patient == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Patient not found"));
-            }
-            if (!patient.getPassword().equals(password)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid password"));
-            }
-            String token = tokenService.generateToken(patient.getEmail());
-            return ResponseEntity.ok(Map.of("token", token));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        }
-    }
-
 // 9. **filterPatient Method**
 // This method filters a patient's appointment history based on condition and Doctor name.
 // - It extracts the email from the JWT token to identify the patient.

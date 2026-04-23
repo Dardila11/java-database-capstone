@@ -1,9 +1,10 @@
 package com.project.back_end.controllers;
 
+import com.project.back_end.DTO.AuthDTO;
 import com.project.back_end.models.Patient;
-import com.project.back_end.DTO.Login;
 import com.project.back_end.services.PatientService;
 import com.project.back_end.services.Service;
+import com.project.back_end.services.ValidationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,12 @@ public class PatientController {
 
     private final PatientService patientService;
     private final Service service;
+    private final ValidationService validationService;
 
-    public PatientController(PatientService patientService, Service service) {
+    public PatientController(PatientService patientService, Service service, ValidationService validationService) {
         this.patientService = patientService;
         this.service = service;
+        this.validationService = validationService;
     }
 
     @GetMapping("/{token}")
@@ -52,8 +55,9 @@ public class PatientController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody Login loginDTO) {
-        return service.validatePatientLogin(loginDTO.getEmail(), loginDTO.getPassword());
+    public ResponseEntity<Map<String, String>> login(@RequestBody AuthDTO.LoginRequest loginRequest){
+        String token = validationService.validatePatientLogin(loginRequest.email(), loginRequest.password());
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
     @GetMapping("/{id}/{token}")
