@@ -1,9 +1,7 @@
 package com.project.back_end.services;
 
-import com.project.back_end.models.Admin;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
-import com.project.back_end.repo.AdminRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
 import org.springframework.http.HttpStatus;
@@ -17,15 +15,13 @@ import java.util.Map;
 public class Service {
 
     private final TokenService tokenService;
-    private final AdminRepository adminRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final DoctorService doctorService;
     private final PatientService patientService;
 
-    public Service(TokenService tokenService, AdminRepository adminRepository, DoctorRepository doctorRepository, PatientRepository patientRepository, DoctorService doctorService, PatientService patientService) {
+    public Service(TokenService tokenService, DoctorRepository doctorRepository, PatientRepository patientRepository, DoctorService doctorService, PatientService patientService) {
         this.tokenService = tokenService;
-        this.adminRepository = adminRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
         this.doctorService = doctorService;
@@ -40,23 +36,6 @@ public class Service {
         }
         return ResponseEntity.ok(Map.of("message", "Token is valid"));
     }
-
-    public ResponseEntity<Map<String, String>> validateAdmin(String username, String password) {
-        try {
-            Admin admin = adminRepository.findByUsername(username);
-            if (admin == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Admin not found"));
-            }
-            if (!admin.getPassword().equals(password)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid password"));
-            }
-            String token = tokenService.generateToken(admin.getUsername());
-            return ResponseEntity.ok(Map.of("token", token));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        }
-    }
-
 
 // 5. **filterDoctor Method**
 // This method provides filtering functionality for doctors based on name, specialty, and available time slots.

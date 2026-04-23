@@ -1,10 +1,12 @@
 package com.project.back_end.controllers;
 
 
+import com.project.back_end.DTO.AuthDTO;
 import com.project.back_end.DTO.Login;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.services.DoctorService;
 import com.project.back_end.services.Service;
+import com.project.back_end.services.ValidationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,10 +34,12 @@ public class DoctorController {
 
     private final DoctorService doctorService;
     private final Service service;
+    private final ValidationService validationService;
 
-    public DoctorController(DoctorService doctorService, Service service) {
+    public DoctorController(DoctorService doctorService, Service service, ValidationService validationService) {
         this.doctorService = doctorService;
         this.service = service;
+        this.validationService = validationService;
     }
 
 // 3. Define the `getDoctorAvailability` Method:
@@ -104,8 +108,9 @@ public class DoctorController {
 //    - Delegates authentication to the `DoctorService` and returns login status and token information.
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> doctorLogin(@RequestBody Login login) {
-        return doctorService.validateDoctor(login);
+    public ResponseEntity<Map<String,String>> doctorLogin(@RequestBody AuthDTO.LoginRequest loginRequest){
+        String token = validationService.validateDoctorLogin(loginRequest.email(), loginRequest.password());
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
 

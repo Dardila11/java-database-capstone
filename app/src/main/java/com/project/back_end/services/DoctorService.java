@@ -101,27 +101,6 @@ public class DoctorService {
     }
   }
 
-  public ResponseEntity<Map<String, String>> validateDoctor(Login login) {
-    Map<String, String> response = new HashMap<>();
-
-    try {
-      Doctor doctor = doctorRepository.findByEmail(login.getEmail());
-
-      if (doctor == null || !doctor.getPassword().equals(login.getPassword())) {
-        response.put("message", "Invalid email or password");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-      }
-
-      String token = tokenService.generateToken(doctor.getEmail());
-      response.put("token", token);
-
-      return ResponseEntity.ok(response);
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-  }
-
   @Transactional
   public List<Doctor> findDoctorByName(String name) {
     List<Doctor> doctors = doctorRepository.findByNameLike(name);
