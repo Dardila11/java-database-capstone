@@ -37,19 +37,11 @@ public class PatientService {
     }
 
     @Transactional
-    public ResponseEntity<Map<String, Object>> getPatientAppointment(long patientId) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            List<AppointmentDTO> appointments = appointmentRepository.findByPatientId(patientId)
-                    .stream()
-                    .map(AppointmentDTO::from)
-                    .collect(Collectors.toList());
-            response.put("appointments", appointments);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("message", "Internal server error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+    public List<AppointmentDTO> getPatientAppointments(Long patientId){
+        return appointmentRepository.findByPatientId(patientId)
+                .stream()
+                .map(AppointmentDTO::from)
+                .collect(Collectors.toList());
     }
 
     public ResponseEntity<Map<String, Object>> filterByCondition(long patientId, String condition) {

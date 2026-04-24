@@ -1,6 +1,7 @@
 package com.project.back_end.services;
 
 import com.project.back_end.exceptions.InvalidCredentialsException;
+import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.models.Admin;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
@@ -26,8 +27,11 @@ public class ValidationService {
         this.doctorRepository = doctorRepository;
     }
 
-    public boolean validateToken(String token, String role) {
-        return tokenService.validateToken(token, role);
+    ///  Validate token
+    ///  If not valid, throws exception InvalidTokenException("Invalid token")
+    public void validateToken(String token, String role) {
+        boolean isValid = tokenService.validateToken(token, role);
+        if(!isValid) throw new InvalidTokenException("Invalid token");
     }
 
     ///  Validate if patient exists

@@ -18,20 +18,6 @@ import java.util.Map;
 @RequestMapping("${api.path}doctor")
 public class DoctorController {
 
-// 1. Set Up the Controller Class:
-//    - Annotate the class with `@RestController` to define it as a REST controller that serves JSON responses.
-//    - Use `@RequestMapping("${api.path}doctor")` to prefix all endpoints with a configurable API path followed by "doctor".
-//    - This class manages doctor-related functionalities such as
-//      registration,
-//      login,
-//      updates
-//      availability.
-
-
-// 2. Autowire Dependencies:
-//    - Inject `DoctorService` for handling the core logic related to doctors (e.g., CRUD operations, authentication).
-//    - Inject the shared `Service` class for general-purpose features like token validation and filtering.
-
     private final DoctorService doctorService;
     private final Service service;
     private final ValidationService validationService;
@@ -40,6 +26,18 @@ public class DoctorController {
         this.doctorService = doctorService;
         this.service = service;
         this.validationService = validationService;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String,String>> doctorLogin(@RequestBody AuthDTO.LoginRequest loginRequest){
+        String token = validationService.validateDoctorLogin(loginRequest.email(), loginRequest.password());
+        return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getDoctor(){
+        return ResponseEntity.ok(Map.of("doctors", doctorService.getDoctors()));
+
     }
 
 // 3. Define the `getDoctorAvailability` Method:
@@ -64,15 +62,7 @@ public class DoctorController {
     }
 
 
-// 4. Define the `getDoctor` Method:
-//    - Handles HTTP GET requests to retrieve a list of all doctors.
-//    - Returns the list within a response map under the key `"doctors"` with HTTP 200 OK status.
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getDoctor(){
-        return ResponseEntity.ok(Map.of("doctors", doctorService.getDoctors()));
-
-    }
 
 // 5. Define the `saveDoctor` Method:
 //    - Handles HTTP POST requests to register a new doctor.
@@ -100,18 +90,6 @@ public class DoctorController {
         };
     }
 
-
-
-// 6. Define the `doctorLogin` Method:
-//    - Handles HTTP POST requests for doctor login.
-//    - Accepts a validated `Login` DTO containing credentials.
-//    - Delegates authentication to the `DoctorService` and returns login status and token information.
-
-    @PostMapping("/login")
-    public ResponseEntity<Map<String,String>> doctorLogin(@RequestBody AuthDTO.LoginRequest loginRequest){
-        String token = validationService.validateDoctorLogin(loginRequest.email(), loginRequest.password());
-        return ResponseEntity.ok(Map.of("token", token));
-    }
 
 
 // 7. Define the `updateDoctor` Method:
