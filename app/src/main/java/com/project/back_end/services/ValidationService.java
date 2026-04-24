@@ -41,11 +41,12 @@ public class ValidationService {
 
     /// Validates patient credentials
     public String validatePatientLogin(String email, String password) {
-        Patient patient = patientRepository.findByEmail(email);
-        if (patient == null || !patient.getPassword().equals(password)) {
+        Optional<Patient> patient = patientRepository.findByEmail(email);
+
+        if (patient.isEmpty() || !patient.get().getPassword().equals(password)) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
-        return tokenService.generateToken(patient.getEmail());
+        return tokenService.generateToken(patient.get().getEmail());
     }
 
     /// Validates admin credentials

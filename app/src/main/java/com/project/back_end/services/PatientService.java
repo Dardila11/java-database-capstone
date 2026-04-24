@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.project.back_end.exceptions.InvalidTokenException;
+import com.project.back_end.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,13 +113,10 @@ public class PatientService {
     }
 
 
-    ///  Return Patient or null
     public Patient getPatientDetails(String token) {
-        try {
-            String email = tokenService.extractEmail(token);
-            return patientRepository.findByEmail(email);
-        } catch (Exception e) {
-            return null;
-        }
+        String email = tokenService.extractEmail(token);
+        if (email == null) throw new InvalidTokenException("Invalid token");
+        return patientRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Patient not found"));
     }
 }

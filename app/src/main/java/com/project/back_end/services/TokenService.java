@@ -60,7 +60,7 @@ public class TokenService {
             return switch (role) {
                 case "admin" -> adminRepository.findByUsername(subject) != null;
                 case "doctor" -> doctorRepository.findByEmail(subject) != null;
-                case "patient" -> patientRepository.findByEmail(subject) != null;
+                case "patient" -> patientRepository.findByEmail(subject).isPresent();
                 default -> false;
             };
         } catch (Exception e) {

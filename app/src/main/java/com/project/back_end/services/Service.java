@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @org.springframework.stereotype.Service
 public class Service {
@@ -34,7 +37,7 @@ public class Service {
         if (!valid) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid or expired token"));
         }
-        return ResponseEntity.ok(Map.of("message", "Token is valid"));
+        return ok(Map.of("message", "Token is valid"));
     }
 
 // 5. **filterDoctor Method**
@@ -98,8 +101,11 @@ public class Service {
 // This flexible method supports patient-specific querying and enhances user experience on the client side.
     public ResponseEntity<Map<String, Object>> filterPatient(String token, String condition, String doctorName) {
         String email = tokenService.extractEmail(token);
-        Patient patient = patientRepository.findByEmail(email);
-        long patientId = patient.getId();
+        Optional<Patient> patient = patientRepository.findByEmail(email);
+        if (patient.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid or expired token"));
+        }
+        long patientId = patient.get().getId();
 
         boolean hasCondition = condition != null && !condition.isEmpty();
         boolean hasDoctorName = doctorName != null && !doctorName.isEmpty();
@@ -111,7 +117,7 @@ public class Service {
         } else if (hasDoctorName) {
             return patientService.filterByDoctor(doctorName, patientId);
         } else {
-            return patientService.getPatientAppointment(patientId);
+            return ResponseEntity.ok(Map.of("appointments", patientService.getPatientAppointments(patientId)));
         }
     }
 }

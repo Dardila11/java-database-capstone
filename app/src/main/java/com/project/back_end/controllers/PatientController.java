@@ -29,17 +29,8 @@ public class PatientController {
 
     @GetMapping("/{token}")
     public ResponseEntity<Map<String, Object>> getPatient(@PathVariable String token) {
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
-        Patient patientDetails = patientService.getPatientDetails(token);
-        if (patientDetails == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Patient not found"));
-        }
-
-        return ResponseEntity.ok(Map.of("patient", patientDetails));
+        validationService.validateToken(token, "patient"); // throws exception if not valid
+        return ResponseEntity.ok(Map.of("patient", patientService.getPatientDetails(token)));
     }
 
     @PostMapping("/create")

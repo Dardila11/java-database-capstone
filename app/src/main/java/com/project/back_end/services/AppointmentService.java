@@ -61,8 +61,8 @@ public class AppointmentService {
       Appointment existing = existingOpt.get();
 
       String email = tokenService.extractEmail(token);
-      Patient patient = patientRepository.findByEmail(email);
-      if (patient == null || !patient.getId().equals(existing.getPatient().getId())) {
+      Optional<Patient> patient = patientRepository.findByEmail(email);
+      if (patient.isEmpty() || !patient.get().getId().equals(existing.getPatient().getId())) {
         return -2;
       }
 
@@ -102,8 +102,8 @@ public class AppointmentService {
       Appointment appointment = appointmentOpt.get();
 
       String email = tokenService.extractEmail(token);
-      Patient patient = patientRepository.findByEmail(email);
-      if (patient == null || !patient.getId().equals(appointment.getPatient().getId())) {
+      Optional<Patient> patient = patientRepository.findByEmail(email);
+      if (patient.isEmpty() || !patient.get().getId().equals(appointment.getPatient().getId())) {
         return -2;
       }
 
