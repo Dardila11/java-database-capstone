@@ -2,7 +2,6 @@ package com.project.back_end.controllers;
 
 
 import com.project.back_end.DTO.AuthDTO;
-import com.project.back_end.DTO.Login;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.services.DoctorService;
 import com.project.back_end.services.Service;
@@ -52,12 +51,7 @@ public class DoctorController {
             @PathVariable LocalDateTime date,
             @PathVariable String token
     ){
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, user);
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
-
+        validationService.validateToken(token, user);
         return ResponseEntity.ok(Map.of("availability", doctorService.getDoctorAvailability(doctorId, date)));
     }
 
@@ -76,11 +70,7 @@ public class DoctorController {
             @PathVariable String token
     ){
         // validate token
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
+        validationService.validateToken(token, "admin");
         int saveResult = doctorService.saveDoctor(doctor);
         return switch (saveResult) {
             case -1 -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "doctor already exists"));
@@ -103,11 +93,7 @@ public class DoctorController {
                 @RequestBody Doctor doctor,
                 @PathVariable String token
         ){
-            ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
-            if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-                return ResponseEntity.status(tokenValidation.getStatusCode())
-                        .body(Map.of("error", tokenValidation.getBody().get("error")));
-            }
+            validationService.validateToken(token, "admin");
             int updateResult = doctorService.updateDoctor(doctor);
             return switch (updateResult) {
 
@@ -130,11 +116,7 @@ public class DoctorController {
             @PathVariable long id,
             @PathVariable String token
     ) {
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "admin");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
+        validationService.validateToken(token, "admin");
         int deleteResult = doctorService.deleteDoctor(id);
         return switch (deleteResult) {
             case -1 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "doctor does not exist"));

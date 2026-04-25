@@ -104,7 +104,7 @@ public class DoctorService {
   @Transactional
   public List<Doctor> findDoctorByName(String name) {
     List<Doctor> doctors = doctorRepository.findByNameLike(name);
-    doctors.forEach(d -> d.getAvailableTimes().size());
+    //doctors.forEach(d -> d.getAvailableTimes().size());
     return doctors;
   }
 
