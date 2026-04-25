@@ -2,16 +2,10 @@ package com.project.back_end.services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.project.back_end.DTO.Login;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.repo.AppointmentRepository;
@@ -23,12 +17,10 @@ import jakarta.transaction.Transactional;
 public class DoctorService {
   private final DoctorRepository doctorRepository;
   private final AppointmentRepository appointmentRepository;
-  private final TokenService tokenService;
 
-  public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, TokenService tokenService) {
+  public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository) {
     this.doctorRepository = doctorRepository;
     this.appointmentRepository = appointmentRepository;
-    this.tokenService = tokenService;
   }
 
   @Transactional
@@ -103,8 +95,8 @@ public class DoctorService {
 
   @Transactional
   public List<Doctor> findDoctorByName(String name) {
-    List<Doctor> doctors = doctorRepository.findByNameLike(name);
-    //doctors.forEach(d -> d.getAvailableTimes().size());
+    List<Doctor> doctors = doctorRepository.findByNameContaining(name);
+    doctors.forEach(d -> d.getAvailableTimes().size());
     return doctors;
   }
 
