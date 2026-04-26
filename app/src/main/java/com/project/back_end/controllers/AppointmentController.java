@@ -4,6 +4,7 @@ import com.project.back_end.DTO.AppointmentDTO;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.services.AppointmentService;
 import com.project.back_end.services.Service;
+import com.project.back_end.services.ValidationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,23 +16,15 @@ import java.util.Map;
 @RequestMapping("/appointments")
 public class AppointmentController {
 
-// 1. Set Up the Controller Class:
-//    - Annotate the class with `@RestController` to define it as a REST API controller.
-//    - Use `@RequestMapping("/appointments")` to set a base path for all appointment-related endpoints.
-//    - This centralizes all routes that deal with booking, updating, retrieving, and canceling appointments.
-
-
-// 2. Autowire Dependencies:
-//    - Inject `AppointmentService` for handling the business logic specific to appointments.
-//    - Inject the general `Service` class, which provides shared functionality like token validation and appointment checks.
-
     private final AppointmentService appointmentService;
     private final Service service;
+    private final ValidationService validationService;
 
 
-    public AppointmentController(AppointmentService appointmentService, Service service) {
+    public AppointmentController(AppointmentService appointmentService, Service service, ValidationService validationService) {
         this.appointmentService = appointmentService;
         this.service = service;
+        this.validationService = validationService;
     }
 
 // 3. Define the `getAppointments` Method:
@@ -47,12 +40,7 @@ public class AppointmentController {
             @PathVariable String patientName,
             @PathVariable String token) {
 
-        // validate token
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "user");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
+        validationService.validateToken(token, "doctor");
         List<AppointmentDTO> appointments = appointmentService.getAppointments(date, patientName, token);
         return ResponseEntity.ok(Map.of("appointments", appointments));
     }
@@ -70,12 +58,7 @@ public class AppointmentController {
             @RequestBody Appointment appointment,
             @PathVariable String token) {
 
-        // validate token
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
+        validationService.validateToken(token,"patient");
 
         if (appointment.getDoctor() == null || appointment.getAppointmentTime() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Doctor and appointment time are required"));
@@ -108,12 +91,7 @@ public class AppointmentController {
             @RequestBody Appointment appointment,
             @PathVariable String token
     ){
-        // validate token
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
+        validationService.validateToken(token, "patient");
 
         int updateResult = appointmentService.updateAppointment(appointment, token);
         return switch (updateResult) {
@@ -141,12 +119,7 @@ public class AppointmentController {
             @PathVariable long id,
             @PathVariable String token
     ){
-        // validate token
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
+        validationService.validateToken(token, "patient");
 
         // Returns: 1 = success, 0 = failure, -1 = not found, -2 = unauthorized.
         int cancelResult = appointmentService.cancelAppointment(id, token);
