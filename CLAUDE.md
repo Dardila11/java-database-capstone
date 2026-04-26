@@ -78,7 +78,7 @@ spring.datasource.password=<mysql_password>
 
 spring.data.mongodb.uri=mongodb://root:<mongodb_password>@<mongodb_host>:27017/prescriptions?authSource=admin
 
-jwt.secret=$!@#$^%$$$%####$DDCPN0234FCFDPD8670M    # change in production
+jwt.secret=${JWT_SECRET}    # set via environment variable — never hardcode
 ```
 
 ### Build and Run
