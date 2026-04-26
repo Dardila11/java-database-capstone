@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: oklch(52% 0.17 192);
+  --teal-light: oklch(94% 0.05 192);
+  --teal-mid: oklch(70% 0.12 192);
+  --indigo: oklch(52% 0.17 262);
+  --indigo-light: oklch(94% 0.05 262);
+  --bg: oklch(98.5% 0.006 220);
+  --surface: #ffffff;
+  --ink: oklch(18% 0.02 240);
+  --ink-2: oklch(42% 0.02 240);
+  --ink-3: oklch(65% 0.015 240);
+  --border: oklch(91% 0.01 240);
+  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.07), 0 1px 2px oklch(0% 0 0 / 0.05);
+  --shadow-md: 0 4px 16px oklch(0% 0 0 / 0.08), 0 1px 4px oklch(0% 0 0 / 0.05);
+  --shadow-lg: 0 12px 40px oklch(0% 0 0 / 0.12), 0 4px 12px oklch(0% 0 0 / 0.06);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+#root { min-height: 100vh; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+@keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(22px) } to { opacity: 1; transform: none } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(32px) } to { opacity: 1; transform: none } }
+@keyframes spin    { to { transform: rotate(360deg) } }
+@keyframes popIn   { 0% { opacity:0; transform:scale(0.92) } 100% { opacity:1; transform:scale(1) } }
