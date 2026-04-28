@@ -18,18 +18,21 @@ public class PrescriptionController {
     private final PrescriptionService prescriptionService;
     private final AppointmentService appointmentService;
     private final ValidationService validationService;
+    private final Service service;
 
-    public PrescriptionController(PrescriptionService prescriptionService, AppointmentService appointmentService, ValidationService validationService) {
+    public PrescriptionController(PrescriptionService prescriptionService, AppointmentService appointmentService, ValidationService validationService, Service service) {
         this.prescriptionService = prescriptionService;
         this.appointmentService = appointmentService;
         this.validationService = validationService;
+        this.service = service;
     }
 
-    @PostMapping("/{token}")
+    @PostMapping("/")
     public ResponseEntity<Map<String, String>> savePrescription(
             @RequestBody Prescription prescription,
-            @PathVariable String token
+            @RequestHeader("Authorization") String authHeader
     ){
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token,"doctor");
 
         int res = prescriptionService.savePrescription(prescription);
@@ -46,11 +49,12 @@ public class PrescriptionController {
 
     }
 
-    @GetMapping("/{appointmentId}/{token}")
+    @GetMapping("/{appointmentId}")
     public ResponseEntity<Map<String, Object>> getPrescription(
             @PathVariable Long appointmentId,
-            @PathVariable String token
+            @RequestHeader("Authorization") String authHeader
     ) {
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "doctor");
         return ResponseEntity.ok(Map.of("prescription", prescriptionService.getPrescription(appointmentId)));
     }

@@ -34,12 +34,13 @@ public class AppointmentController {
 //    - If the token is valid, returns appointments for the given patient on the specified date.
 //    - If the token is invalid or expired, responds with the appropriate message and status code.
 
-    @GetMapping("/{date}/{patientName}/{token}")
+    @GetMapping("/{date}/{patientName}/")
     public ResponseEntity<Map<String, Object>> getAppointments(
             @PathVariable String date,
             @PathVariable String patientName,
-            @PathVariable String token) {
+            @RequestHeader("Authorization") String authHeader) {
 
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "doctor");
         List<AppointmentDTO> appointments = appointmentService.getAppointments(date, patientName, token);
         return ResponseEntity.ok(Map.of("appointments", appointments));
@@ -53,11 +54,12 @@ public class AppointmentController {
 //    - Validates the token for the `"patient"` role.
 //    - Uses service logic to validate the appointment data (e.g., check for doctor availability and time conflicts).
 //    - Returns success if booked, or appropriate error messages if the doctor ID is invalid or the slot is already taken.
-    @PostMapping("/{token}")
+    @PostMapping("/")
     public ResponseEntity<Map<String, String>> bookAppointment(
             @RequestBody Appointment appointment,
-            @PathVariable String token) {
+            @RequestHeader("Authorization") String authHeader) {
 
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token,"patient");
 
         if (appointment.getDoctor() == null || appointment.getAppointmentTime() == null) {
@@ -86,11 +88,12 @@ public class AppointmentController {
 //    - Validates the token for `"patient"` role.
 //    - Delegates the update logic to the `AppointmentService`.
 //    - Returns an appropriate success or failure response based on the update result.
-    @PutMapping("/{token}")
+    @PutMapping("/")
     public ResponseEntity<Map<String, String>> updateAppointment(
             @RequestBody Appointment appointment,
-            @PathVariable String token
+            @RequestHeader("Authorization") String authHeader
     ){
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient");
 
         int updateResult = appointmentService.updateAppointment(appointment, token);
@@ -114,11 +117,12 @@ public class AppointmentController {
 //    - Accepts the appointment ID and a token as path variables.
 //    - Validates the token for `"patient"` role to ensure the user is authorized to cancel the appointment.
 //    - Calls `AppointmentService` to handle the cancellation process and returns the result.
-    @DeleteMapping("/{id}/{token}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> cancelAppointment(
             @PathVariable long id,
-            @PathVariable String token
+            @RequestHeader("Authorization") String authHeader
     ){
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient");
 
         // Returns: 1 = success, 0 = failure, -1 = not found, -2 = unauthorized.
