@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,11 +13,14 @@ import com.project.back_end.repo.AdminRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 @Component
 public class TokenService {
+
+    private static final Logger log = LoggerFactory.getLogger(TokenService.class);
 
     private final AdminRepository adminRepository;
     private final DoctorRepository doctorRepository;
@@ -63,7 +68,10 @@ public class TokenService {
                 case "patient" -> patientRepository.findByEmail(subject).isPresent();
                 default -> false;
             };
+        } catch (JwtException e) {
+            return false;
         } catch (Exception e) {
+            log.error("Unexpected error during token validation for role '{}': {}", role, e.getMessage(), e);
             return false;
         }
     }
