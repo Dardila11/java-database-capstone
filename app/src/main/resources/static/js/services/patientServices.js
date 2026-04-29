@@ -31,7 +31,13 @@ export async function patientSignup(data) {
 // For getting patient data (name ,id , etc ). Used in booking appointments
 export async function getPatientData(token) {
   try {
-    const response = await fetch(`${PATIENT_API}/${token}`);
+    const response = await fetch(`${PATIENT_API}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
     const data = await response.json();
     if (response.ok) return data.patient;
     return null;
@@ -45,7 +51,13 @@ export async function getPatientData(token) {
 export async function getPatientAppointments(id, token, user)
 {
   try {
-    const response = await fetch(`${PATIENT_API}/${id}/${token}`);
+    const response = await fetch(`${PATIENT_API}/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
     const data = await response.json();
     console.log(data.appointments)
     if (response.ok) {
@@ -61,10 +73,11 @@ export async function getPatientAppointments(id, token, user)
 
 export async function filterAppointments(condition, name, token) {
   try {
-    const response = await fetch(`${PATIENT_API}/filter/${condition}/${name}/${token}`, {
+    const response = await fetch(`${PATIENT_API}/filter/${condition}/${name}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
