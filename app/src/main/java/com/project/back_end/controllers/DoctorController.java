@@ -44,13 +44,14 @@ public class DoctorController {
 //    - Requires `user` type, `doctorId`, `date`, and `token` as path variables.
 //    - First validates the token against the user type.
 //    - If the token is invalid, returns an error response; otherwise, returns the availability status for the doctor.
-    @GetMapping("/availability/{user}/{doctorId}/{date}/{token}")
+    @GetMapping("/availability/{user}/{doctorId}/{date}")
     public ResponseEntity<Map<String, Object>> getDoctorAvailability(
             @PathVariable String user,
             @PathVariable long doctorId,
             @PathVariable LocalDateTime date,
-            @PathVariable String token
+            @RequestHeader("Authorization") String authHeader
     ){
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, user);
         return ResponseEntity.ok(Map.of("availability", doctorService.getDoctorAvailability(doctorId, date)));
     }
@@ -64,12 +65,13 @@ public class DoctorController {
 //    - Validates the token for the `"admin"` role before proceeding.
 //    - If the doctor already exists, returns a conflict response; otherwise, adds the doctor and returns a success message.
 
-    @PostMapping("/{token}")
+    @PostMapping("/")
     public ResponseEntity<Map<String, String>> saveDoctor(
             @RequestBody Doctor doctor,
-            @PathVariable String token
+            @RequestHeader("Authorization") String authHeader
     ){
         // validate token
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "admin");
         int saveResult = doctorService.saveDoctor(doctor);
         return switch (saveResult) {
@@ -88,11 +90,12 @@ public class DoctorController {
 //    - Token must belong to an `"admin"`.
 //    - If the doctor exists, updates the record and returns success; otherwise, returns not found or error messages.
 
-        @PutMapping("/{token}")
+        @PutMapping("/")
         public ResponseEntity<Map<String, String>> updateDoctor(
                 @RequestBody Doctor doctor,
-                @PathVariable String token
+                @RequestHeader("Authorization") String authHeader
         ){
+            String token = service.extractToken(authHeader);
             validationService.validateToken(token, "admin");
             int updateResult = doctorService.updateDoctor(doctor);
             return switch (updateResult) {
@@ -111,11 +114,12 @@ public class DoctorController {
 //    - Requires both doctor ID and an admin token as path variables.
 //    - If the doctor exists, deletes the record and returns a success message; otherwise, responds with a not found or error message.
 
-    @DeleteMapping("/{id}/{token}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteDoctor(
             @PathVariable long id,
-            @PathVariable String token
+            @RequestHeader("Authorization") String authHeader
     ) {
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "admin");
         int deleteResult = doctorService.deleteDoctor(id);
         return switch (deleteResult) {

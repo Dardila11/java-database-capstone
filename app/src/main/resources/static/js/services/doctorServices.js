@@ -15,8 +15,9 @@ export async function getDoctors() {
 
 export async function deleteDoctor(doctorId, token) {
   try {
-    const response = await fetch(`${DOCTOR_API}/${doctorId}/${token}`, {
+    const response = await fetch(`${DOCTOR_API}/${doctorId}`, {
       method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
     });
     const data = await response.json();
     return { success: response.ok, message: data.message };
@@ -28,9 +29,12 @@ export async function deleteDoctor(doctorId, token) {
 
 export async function saveDoctor(doctor, token) {
   try {
-    const response = await fetch(`${DOCTOR_API}/${token}`, {
+    const response = await fetch(`${DOCTOR_API}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(doctor),
     });
     const data = await response.json();

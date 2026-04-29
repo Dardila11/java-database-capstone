@@ -1,11 +1,10 @@
 package com.project.back_end.mvc;
 
 import com.project.back_end.services.Service;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -18,8 +17,8 @@ public class DashboardController {
         this.service = service;
     }
 
-    @GetMapping("/adminDashboard/{token}")
-    public String adminDashboard(@PathVariable String token) {
+    @GetMapping("/adminDashboard")
+    public String adminDashboard(@RequestParam String token) {
         ResponseEntity<Map<String, String>> validation = service.validateToken(token, "admin");
         if (validation.getStatusCode().is2xxSuccessful()) {
             return "admin/adminDashboard";
@@ -27,18 +26,17 @@ public class DashboardController {
         return "redirect:/";
     }
 
-    @GetMapping("/doctorDashboard/{token}")
-    public String doctorDashboard(@PathVariable String token) {
+    @GetMapping("/doctorDashboard")
+    public String doctorDashboard(@RequestParam String token) {
         ResponseEntity<Map<String, String>> validation = service.validateToken(token, "doctor");
-        assert validation.getBody() != null;
         if (validation.getStatusCode().is2xxSuccessful()) {
             return "doctor/doctorDashboard";
         }
         return "redirect:/";
     }
 
-    @GetMapping("/loggedPatientDashboard/{token}")
-    public String patientDashboard(@PathVariable String token) {
+    @GetMapping("/loggedPatientDashboard")
+    public String patientDashboard(@RequestParam String token) {
         ResponseEntity<Map<String, String>> validation = service.validateToken(token, "patient");
         if (validation.getStatusCode().is2xxSuccessful()) {
             return "loggedPatient/loggedPatientDashboard";

@@ -31,6 +31,12 @@ public class Service {
         this.patientService = patientService;
     }
 
+    public String extractToken(String authHeader) {
+        return (authHeader != null && authHeader.startsWith("Bearer "))
+                ? authHeader.substring(7)
+                : authHeader;
+    }
+
 
     public ResponseEntity<Map<String, String>> validateToken(String token, String role) {
         boolean valid = tokenService.validateToken(token, role);

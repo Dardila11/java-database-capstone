@@ -4,10 +4,10 @@ function selectRole(role) {
   setRole(role);
   const token = localStorage.getItem('token');
   const routes = {
-    admin: token ? `/adminDashboard/${token}` : null,
-    doctor: token ? `/doctorDashboard/${token}` : null,
+    admin: token ? `/adminDashboard?token=${token}` : null,
+    doctor: token ? `/doctorDashboard?token=${token}` : null,
     patient: "/pages/patientDashboard.html",
-    loggedPatient: token ? `/loggedPatientDashboard/${token}`  : null
+    loggedPatient: token ? `/loggedPatientDashboard?token=${token}`  : null
   };
 
   const target = routes[role];

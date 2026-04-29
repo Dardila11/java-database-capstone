@@ -1,13 +1,11 @@
 package com.project.back_end.controllers;
 
 import com.project.back_end.DTO.AuthDTO;
-import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.models.Patient;
 import com.project.back_end.services.PatientService;
 import com.project.back_end.services.Service;
 import com.project.back_end.services.ValidationService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +25,9 @@ public class PatientController {
         this.validationService = validationService;
     }
 
-    @GetMapping("/{token}")
-    public ResponseEntity<Map<String, Object>> getPatient(@PathVariable String token) {
+    @GetMapping("/")
+    public ResponseEntity<Map<String, Object>> getPatient(@RequestHeader("Authorization") String authHeader) {
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient"); // throws exception if not valid
         return ResponseEntity.ok(Map.of("patient", patientService.getPatientDetails(token)));
     }
@@ -52,23 +51,24 @@ public class PatientController {
         return ResponseEntity.ok(Map.of("token", token));
     }
 
-    @GetMapping("/{id}/{token}")
-    public ResponseEntity<Map<String, Object>> getPatientAppointments(@PathVariable long id, @PathVariable String token) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getPatientAppointments(
+            @PathVariable long id,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient"); // throws exception if not valid
         return ResponseEntity.ok(Map.of("appointments", patientService.getPatientAppointments(id)));
     }
 
-    @GetMapping("/filter/{condition}/{name}/{token}")
+    @GetMapping("/filter/{condition}/{name}")
     public ResponseEntity<Map<String, Object>> filterPatientAppointment(
             @PathVariable String condition,
             @PathVariable String name,
-            @PathVariable String token) {
-        ResponseEntity<Map<String, String>> tokenValidation = service.validateToken(token, "patient");
-        if((tokenValidation == null) || (tokenValidation.getBody() == null)){
-            return ResponseEntity.status(tokenValidation.getStatusCode())
-                    .body(Map.of("error", tokenValidation.getBody().get("error")));
-        }
+            @RequestHeader("Authorization") String authHeader) {
 
+        String token = service.extractToken(authHeader);
+        validationService.validateToken(token, "patient"); // throws exception if not valid
         return service.filterPatient(token, condition, name);
     }
 }
