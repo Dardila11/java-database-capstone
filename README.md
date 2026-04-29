@@ -1,6 +1,6 @@
 # Smart Clinic Management System
 
-A full-stack web application for managing clinic operations, exposing a Spring Boot REST API backed by MySQL and MongoDB, with a static HTML/JS frontend and Thymeleaf-rendered dashboards for admins, doctors, and logged-in patients.
+A full-stack web application for managing clinic operations, exposing a Spring Boot REST API backed by MySQL and MongoDB, with a static HTML/JS frontend and Thymeleaf-rendered dashboards for admins, doctors, and patients.
 
 ---
 
@@ -15,7 +15,7 @@ A full-stack web application for managing clinic operations, exposing a Spring B
 | Document DB | MongoDB (Spring Data MongoDB) |
 | Auth | JWT (JJWT 0.12.6) |
 | Templating | Thymeleaf |
-| Frontend | Vanilla HTML + CSS + JavaScript |
+| Frontend | Vanilla HTML + CSS + JavaScript, React |
 
 ---
 
@@ -27,7 +27,19 @@ A full-stack web application for managing clinic operations, exposing a Spring B
 
 ---
 
+## Configuration
 
+All runtime configuration lives in `app/src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:mysql://<mysql_host>/cms?usessl=false
+spring.datasource.username=root
+spring.datasource.password=<mysql_password>
+
+spring.data.mongodb.uri=mongodb://root:<mongodb_password>@<mongodb_host>:27017/prescriptions?authSource=admin
+
+jwt.secret=${JWT_SECRET}
+```
 
 ---
 
@@ -64,56 +76,69 @@ HTTP Request
 **MySQL** stores structured relational data: `Patient`, `Doctor`, `Appointment`, `Admin`.  
 **MongoDB** stores flexible prescription documents (`prescriptions` collection).
 
-Authentication uses JWT tokens passed as path variables. Tokens encode the user's email and are valid for 7 days. Roles: `admin`, `doctor`, `patient`.
+### Authentication
+
+Login endpoints return a JWT token valid for 7 days. All protected endpoints require the token in the `Authorization` request header. Roles: `admin`, `doctor`, `patient`.
 
 ---
 
 ## API Endpoints
 
+> Protected endpoints require an `Authorization` header with a valid JWT token.
+
 ### Admin
-| Method | Path | Description |
-|---|---|---|
-| POST | `/admin/login` | Login, returns JWT |
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/admin/login` | No | Login, returns JWT |
 
 ### Doctor
-| Method | Path | Description |
-|---|---|---|
-| GET | `/doctor` | List all doctors |
-| GET | `/doctor/filter/{name}/{time}/{speciality}` | Filter doctors |
-| GET | `/doctor/{userId}/{doctorId}/{date}/{token}` | Get doctor with availability |
-| POST | `/doctor/{token}` | Create doctor (admin only) |
-| PUT | `/doctor/{token}` | Update doctor (admin only) |
-| DELETE | `/doctor/{doctorId}/{token}` | Delete doctor (admin only) |
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/doctor/login` | No | Doctor login, returns JWT |
+| GET | `/doctor` | No | List all doctors |
+| GET | `/doctor/filter/{name}/{time}/{speciality}` | No | Filter doctors by name, time, and specialty |
+| GET | `/doctor/availability/{user}/{doctorId}/{date}` | Yes | Get doctor availability for a date |
+| POST | `/doctor/` | Yes (admin) | Create doctor |
+| PUT | `/doctor/` | Yes (admin) | Update doctor |
+| DELETE | `/doctor/{id}` | Yes (admin) | Delete doctor |
 
 ### Patient
-| Method | Path | Description |
-|---|---|---|
-| POST | `/patient` | Register patient |
-| POST | `/patient/login` | Login, returns JWT |
-| GET | `/patient/{token}` | Get patient by token |
-| GET | `/patient/{patientId}/{token}/appointments` | Get patient's appointments |
-| GET | `/patient/{patientId}/{token}/filter` | Filter patient's appointments |
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/patient/create` | No | Register new patient |
+| POST | `/patient/login` | No | Patient login, returns JWT |
+| GET | `/patient/` | Yes (patient) | Get current patient details |
+| GET | `/patient/{id}` | Yes (patient) | Get patient appointments by ID |
+| GET | `/patient/filter/{condition}/{name}` | Yes (patient) | Filter patient appointments |
 
 ### Appointment
-| Method | Path | Description |
-|---|---|---|
-| GET | `/appointments/{date}/{patientName}/{token}` | Doctor's appointments (filtered) |
-| POST | `/appointments/{token}` | Book appointment |
-| PUT | `/appointments/{token}` | Update appointment |
-| DELETE | `/appointments/{appointmentId}/{token}` | Cancel appointment |
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/appointments/{date}/{patientName}/` | Yes (doctor) | Get appointments by date and patient name |
+| POST | `/appointments/` | Yes (patient) | Book appointment |
+| PUT | `/appointments/` | Yes (patient) | Update appointment |
+| DELETE | `/appointments/{id}` | Yes (patient) | Cancel appointment |
 
 ### Prescription
-| Method | Path | Description |
-|---|---|---|
-| POST | `/prescription/{token}` | Save prescription (doctor only) |
-| GET | `/prescription/{appointmentId}/{token}` | Get prescription by appointment |
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/prescription/` | Yes (doctor) | Save prescription |
+| GET | `/prescription/{appointmentId}` | Yes | Get prescription by appointment |
 
 ### MVC Dashboards
+
+> Token is passed as a query parameter: `?token=<jwt>`
+
 | Method | Path | Description |
 |---|---|---|
-| GET | `/adminDashboard/{token}` | Admin dashboard (Thymeleaf) |
-| GET | `/doctorDashboard/{token}` | Doctor dashboard (Thymeleaf) |
-| GET | `/loggedPatientDashboard/{token}` | Patient dashboard (Thymeleaf) |
+| GET | `/adminDashboard?token={token}` | Admin dashboard (Thymeleaf) |
+| GET | `/doctorDashboard?token={token}` | Doctor dashboard (Thymeleaf) |
+| GET | `/loggedPatientDashboard?token={token}` | Patient dashboard (Thymeleaf) |
 
 ---
 
@@ -131,18 +156,31 @@ java-database-capstone/
         │   ├── java/com/project/back_end/
         │   │   ├── BackEndApplication.java
         │   │   ├── config/
-        │   │   ├── controllers/
-        │   │   ├── mvc/
-        │   │   ├── models/
-        │   │   ├── repo/
-        │   │   ├── services/
-        │   │   └── DTO/
+        │   │   ├── controllers/          # REST controllers
+        │   │   ├── mvc/                  # Thymeleaf MVC controller
+        │   │   ├── models/               # JPA entities + MongoDB document
+        │   │   ├── repo/                 # Spring Data repositories
+        │   │   ├── services/             # Business logic
+        │   │   └── DTO/                  # Data transfer objects
         │   └── resources/
         │       ├── application.properties
-        │       ├── static/          # Patient-facing HTML/CSS/JS
+        │       ├── static/
+        │       │   ├── index.html        # Landing / role selection
+        │       │   ├── pages/            # Patient-facing HTML pages
+        │       │   │   ├── addPrescription.html
+        │       │   │   ├── patientAppointments.html
+        │       │   │   ├── patientDashboard.html
+        │       │   │   ├── patientRecord.html
+        │       │   │   └── updateAppointment.html
+        │       │   ├── react/            # React frontend build
+        │       │   ├── assets/           # CSS and images
+        │       │   └── js/               # JavaScript modules
+        │       │       ├── config/       # API base URL config
+        │       │       ├── services/     # API call wrappers
+        │       │       └── components/   # Reusable DOM components
         │       └── templates/
-        │           ├── admin/       # Admin dashboard
-        │           ├── doctor/      # Doctor dashboard
-        │           └── loggedPatient/  # Patient dashboard
+        │           ├── admin/            # Admin dashboard template
+        │           ├── doctor/           # Doctor dashboard template
+        │           └── loggedPatient/    # Patient dashboard template
         └── test/
 ```
