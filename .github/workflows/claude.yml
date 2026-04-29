@@ -12,6 +12,12 @@ on:
 jobs:
   claude:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # commit fixes / open PRs
+      pull-requests: write   # post PR comments & reviews
+      issues: write          # comment on issues
+      actions: read          # read CI results on PRs
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
