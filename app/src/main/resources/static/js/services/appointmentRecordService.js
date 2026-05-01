@@ -73,3 +73,19 @@ export async function updateAppointment(appointment, token) {
     };
   }
 }
+
+export async function cancelAppointment(appointmentId, token) {
+  try {
+    const response = await fetch(`${APPOINTMENT_API}/${appointmentId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    const data = await response.json();
+    return { success: response.ok, message: data.message || "Something went wrong" };
+  } catch (error) {
+    console.error("Error cancelling appointment:", error);
+    return { success: false, message: "Network error. Please try again later." };
+  }
+}
