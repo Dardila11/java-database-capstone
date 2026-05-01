@@ -19,6 +19,11 @@ export async function getAllAppointments(date, patientName, token) {
   return await response.json();
 }
 
+export async function getAppointmentRecord(token) {
+  const today = new Date().toISOString().split("T")[0];
+  return getAllAppointments(today, " ", token);
+}
+
 export async function bookAppointment(appointment, token) {
   try {
     const response = await fetch(`${APPOINTMENT_API}`, {

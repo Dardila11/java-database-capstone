@@ -17,7 +17,7 @@ export async function savePrescription(prescription, token) {
   }
   catch (error) {
     console.error("Error :: savePrescription :: ", error)
-    return { success: false, message: result.message }
+    return { success: false, message: "Network error" }
   }
 }
 
