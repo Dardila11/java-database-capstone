@@ -10,6 +10,7 @@ import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.repo.AppointmentRepository;
 import com.project.back_end.repo.DoctorRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.transaction.Transactional;
 
@@ -17,10 +18,13 @@ import jakarta.transaction.Transactional;
 public class DoctorService {
   private final DoctorRepository doctorRepository;
   private final AppointmentRepository appointmentRepository;
+  private final PasswordEncoder passwordEncoder;
 
-  public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository) {
+  public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository,
+                       PasswordEncoder passwordEncoder) {
     this.doctorRepository = doctorRepository;
     this.appointmentRepository = appointmentRepository;
+    this.passwordEncoder = passwordEncoder;
   }
 
   @Transactional
@@ -52,6 +56,7 @@ public class DoctorService {
       if (doctorRepository.findByEmail(doctor.getEmail()) != null) {
         return -1;
       }
+      doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
       doctorRepository.save(doctor);
       return 1;
     } catch (Exception e) {
@@ -62,8 +67,13 @@ public class DoctorService {
 
   public int updateDoctor(Doctor doctor) {
     try {
-      if (!doctorRepository.existsById(doctor.getId())) {
-        return -1;
+      Doctor existing = doctorRepository.findById(doctor.getId()).orElse(null);
+      if (existing == null) return -1;
+      if (doctor.getPassword() != null && !doctor.getPassword().isBlank()) {
+        doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
+      } else {
+        // preserve the existing hash when no new password is provided
+        doctor.setPassword(existing.getPassword());
       }
       doctorRepository.save(doctor);
       return 1;

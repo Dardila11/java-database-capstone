@@ -9,6 +9,7 @@ import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project.back_end.DTO.AppointmentDTO;
@@ -22,15 +23,19 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
     private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
 
-    public PatientService(PatientRepository patientRepository, AppointmentRepository appointmentRepository, TokenService tokenService) {
+    public PatientService(PatientRepository patientRepository, AppointmentRepository appointmentRepository,
+                          TokenService tokenService, PasswordEncoder passwordEncoder) {
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
         this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public int createPatient(Patient patient) {
         try {
+            patient.setPassword(passwordEncoder.encode(patient.getPassword()));
             patientRepository.save(patient);
             return 1;
         } catch (Exception e) {
