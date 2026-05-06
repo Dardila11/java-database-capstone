@@ -15,8 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.print.Doc;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,13 +28,14 @@ import static org.mockito.Mockito.when;
 @DisplayName("PatientServiceTest")
 public class PatientServiceTest {
 
-    private static final String TOKEN = "some.jwt.token";
     private static final String PATIENT_EMAIL = "patient@example.com";
     private static final String DOCTOR_EMAIL = "doctor@example.com";
 
     @Mock private PatientRepository patientRepository;
     @Mock private AppointmentRepository appointmentRepository;
     @Mock private TokenService tokenService;
+    @Mock private PasswordEncoder passwordEncoder;
+
 
     @InjectMocks
     private PatientService patientService;
@@ -44,6 +45,7 @@ public class PatientServiceTest {
         p.setId(id);
         p.setName("Test Patient");
         p.setEmail(PATIENT_EMAIL);
+        p.setPassword("testPatient12345");
         return p;
     }
 

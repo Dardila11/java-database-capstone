@@ -44,10 +44,6 @@ class AppointmentServiceTest {
     @InjectMocks
     private AppointmentService appointmentService;
 
-    // -----------------------------------------------------------------------
-    // Shared fixture helpers
-    // -----------------------------------------------------------------------
-
     private Patient patient(long id) {
         Patient p = new Patient();
         p.setId(id);
@@ -75,10 +71,6 @@ class AppointmentServiceTest {
         return a;
     }
 
-    // -----------------------------------------------------------------------
-    // bookAppointment
-    // -----------------------------------------------------------------------
-
     @Nested
     @DisplayName("bookAppointment()")
     class BookAppointment {
@@ -104,10 +96,6 @@ class AppointmentServiceTest {
             assertThat(appointmentService.bookAppointment(appt)).isEqualTo(0);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // cancelAppointment
-    // -----------------------------------------------------------------------
 
     @Nested
     @DisplayName("cancelAppointment()")
@@ -166,10 +154,6 @@ class AppointmentServiceTest {
             verify(appointmentRepository).deleteById(10L);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // updateAppointment
-    // -----------------------------------------------------------------------
 
     @Nested
     @DisplayName("updateAppointment()")
@@ -243,7 +227,6 @@ class AppointmentServiceTest {
         void returns1AndSavesOnSuccess() {
             Patient owner = patient(1L);
             Doctor doc = doctor(1L);
-            // availableTimes = ["09:00", "10:00", "14:00"]
             Appointment existing = scheduledAppointment(10L, doc, owner,
                     LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
             LocalDateTime newTime = LocalDate.now().plusDays(1).atTime(LocalTime.of(10, 0));
@@ -262,9 +245,6 @@ class AppointmentServiceTest {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // getAppointments
-    // -----------------------------------------------------------------------
 
     @Nested
     @DisplayName("getAppointments()")
@@ -328,10 +308,6 @@ class AppointmentServiceTest {
             assertThat(result).isEmpty();
         }
     }
-
-    // -----------------------------------------------------------------------
-    // changeStatus
-    // -----------------------------------------------------------------------
 
     @Nested
     @DisplayName("changeStatus()")
