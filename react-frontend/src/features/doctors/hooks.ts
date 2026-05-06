@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getDoctors, filterDoctors, saveDoctor, updateDoctor, deleteDoctor } from "./api";
-import type { Doctor } from "@/types/api";
+import type { Doctor, DoctorCreateRequest } from "@/types/api";
 
 export function useAllDoctors() {
   return useQuery({
@@ -26,7 +26,7 @@ export function useFilterDoctors(name: string, time: string, specialty: string, 
 export function useSaveDoctor(token: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (doctor: Omit<Doctor, "id">) => saveDoctor(doctor, token),
+    mutationFn: (doctor: DoctorCreateRequest) => saveDoctor(doctor, token),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["doctors"] }),
   });
 }

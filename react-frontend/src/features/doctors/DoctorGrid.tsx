@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DoctorCard } from "./DoctorCard";
 import { DoctorListRow } from "./DoctorListRow";
 import { AddDoctorModal } from "./AddDoctorModal";
-import type { Doctor } from "@/types/api";
+import type { Doctor, DoctorCreateRequest } from "@/types/api";
 
 interface DoctorWithMeta extends Doctor {
   status?: string;
@@ -19,7 +19,7 @@ interface Props {
   showRatings?: boolean;
   defaultView?: "grid" | "list";
   onDelete?: (id: number) => void;
-  onAdd?: (doctor: Omit<Doctor, "id">) => Promise<void>;
+  onAdd?: (doctor: DoctorCreateRequest) => Promise<void>;
   onBook?: (doc: DoctorWithMeta) => void;
 }
 

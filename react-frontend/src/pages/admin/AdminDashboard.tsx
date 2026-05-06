@@ -8,7 +8,7 @@ import { useAllDoctors, useSaveDoctor, useDeleteDoctor } from "@/features/doctor
 import { useDoctorAppointments } from "@/features/appointments/hooks";
 import { AppointmentRow } from "@/features/appointments/AppointmentRow";
 import { getInitials, todayISO } from "@/lib/utils";
-import type { Doctor } from "@/types/api";
+import type { Doctor, DoctorCreateRequest } from "@/types/api";
 
 const COLORS = ["#0d9488","#7c3aed","#0369a1","#b45309","#be185d","#065f46"];
 
@@ -125,7 +125,7 @@ export function AdminDashboard() {
           doctors={doctors}
           isAdmin
           onDelete={(id) => deleteDoctor(id)}
-          onAdd={async (doc) => { await saveDoctor(doc); }}
+          onAdd={async (doc: DoctorCreateRequest) => { await saveDoctor(doc); }}
         />
       )}
 

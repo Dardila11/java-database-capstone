@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { SPECIALTIES, HOURS, COLORS_POOL, slotToTimeRange } from "@/lib/constants";
-import type { Doctor } from "@/types/api";
+import { SPECIALTIES, HOURS, slotToTimeRange } from "@/lib/constants";
+import type { DoctorCreateRequest } from "@/types/api";
 
 const EMPTY_FORM = {
   name: "", specialty: SPECIALTIES[0], exp: "", email: "", phone: "",
@@ -10,7 +10,7 @@ const EMPTY_FORM = {
 
 interface Props {
   onClose: () => void;
-  onAdd: (doctor: Omit<Doctor, "id">) => Promise<void>;
+  onAdd: (doctor: DoctorCreateRequest) => Promise<void>;
 }
 
 export function AddDoctorModal({ onClose, onAdd }: Props) {
@@ -40,8 +40,7 @@ export function AddDoctorModal({ onClose, onAdd }: Props) {
       const availableTimes = Object.entries(form.availability)
         .filter(([, on]) => on)
         .map(([label]) => slotToTimeRange(label));
-      const color = COLORS_POOL[Math.floor(Math.random() * COLORS_POOL.length)];
-      await onAdd({ name: form.name, specialty: form.specialty, email: form.email, phone: form.phone, availableTimes, ...(color as unknown as object) });
+      await onAdd({ name: form.name, specialty: form.specialty, email: form.email, phone: form.phone, password: form.password, availableTimes });
       setSuccess(true);
       setTimeout(onClose, 1400);
     } catch (err) {

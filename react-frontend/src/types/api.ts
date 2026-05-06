@@ -39,6 +39,15 @@ export interface Prescription {
   doctorNotes: string;
 }
 
+export interface DoctorCreateRequest {
+  name: string;
+  specialty: string;
+  email: string;
+  phone: string;
+  password: string;
+  availableTimes: string[];
+}
+
 export interface PatientCreateRequest {
   name: string;
   email: string;
