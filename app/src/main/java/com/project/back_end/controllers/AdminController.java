@@ -3,6 +3,7 @@ package com.project.back_end.controllers;
 
 import com.project.back_end.DTO.AuthDTO;
 import com.project.back_end.services.ValidationService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> adminLogin(@RequestBody AuthDTO.AdminLoginRequest adminLoginRequest) {
+    public ResponseEntity<Map<String, String>> adminLogin(@Valid @RequestBody AuthDTO.AdminLoginRequest adminLoginRequest) {
         String token = validationService.validateAdminLogin(adminLoginRequest.username(), adminLoginRequest.password());
         return ResponseEntity.ok(Map.of("token", token));
     }

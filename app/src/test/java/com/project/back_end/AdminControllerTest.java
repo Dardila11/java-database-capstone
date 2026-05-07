@@ -54,8 +54,8 @@ class AdminControllerTest {
     class BadCredentials {
 
         @Test
-        @DisplayName("wrong password returns 401 with error message")
-        void wrongPassword_returns401() throws Exception {
+        @DisplayName("wrong username or password returns 401 with error message")
+        void wrongUserOrPassword_returns401() throws Exception {
             AuthDTO.AdminLoginRequest body = new AuthDTO.AdminLoginRequest("admin", "wrong");
             when(validationService.validateAdminLogin("admin", "wrong"))
                     .thenThrow(new InvalidCredentialsException("Invalid username or password"));
@@ -69,17 +69,21 @@ class AdminControllerTest {
         }
 
         @Test
-        @DisplayName("unknown username returns 401 with error message")
-        void unknownUsername_returns401() throws Exception {
-            AuthDTO.AdminLoginRequest body = new AuthDTO.AdminLoginRequest("nobody", "pass");
-            when(validationService.validateAdminLogin("nobody", "pass"))
-                    .thenThrow(new InvalidCredentialsException("Invalid username or password"));
+        @DisplayName("missing body returns 400")
+        void missingBody_returns400() throws Exception {
+            mockMvc.perform(post("/admin/login").contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
 
+        @Test
+        @DisplayName("empty body returns 400")
+        void emptyBody_returns400() throws Exception {
+            String invalidPayload =
+                    "{\"username\":\"\",\"password\":\"\"}";
             mockMvc.perform(post("/admin/login")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(body)))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error").value("Invalid username or password"));
+                            .content(invalidPayload))
+                    .andExpect(status().isBadRequest());
         }
     }
 }
