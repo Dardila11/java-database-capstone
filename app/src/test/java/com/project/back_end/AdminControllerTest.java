@@ -50,7 +50,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    @DisplayName("bad credentials")
+    @DisplayName("invalid credentials")
     class BadCredentials {
 
         @Test
@@ -72,7 +72,8 @@ class AdminControllerTest {
         @DisplayName("missing body returns 400")
         void missingBody_returns400() throws Exception {
             mockMvc.perform(post("/admin/login").contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").exists());
         }
 
         @Test
@@ -83,7 +84,9 @@ class AdminControllerTest {
             mockMvc.perform(post("/admin/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidPayload))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.error").exists());
         }
     }
 }
