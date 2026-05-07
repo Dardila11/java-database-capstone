@@ -73,6 +73,7 @@ class AdminControllerTest {
         void missingBody_returns400() throws Exception {
             mockMvc.perform(post("/admin/login").contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.error").exists());
         }
 

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,8 +39,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex){
+
+        String msg = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ":" + e.getDefaultMessage())
+                .collect(Collectors.joining(","));
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Invalid or missing request body"));
+                .body(Map.of("error", msg));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
