@@ -46,7 +46,7 @@ public class PatientController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody AuthDTO.LoginRequest loginRequest){
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody AuthDTO.LoginRequest loginRequest){
         String token = validationService.validatePatientLogin(loginRequest.email(), loginRequest.password());
         return ResponseEntity.ok(Map.of("token", token));
     }
