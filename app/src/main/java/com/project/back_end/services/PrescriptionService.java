@@ -1,5 +1,6 @@
 package com.project.back_end.services;
 
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Prescription;
 import com.project.back_end.repo.PrescriptionRepository;
 import org.springframework.stereotype.Service;
@@ -15,16 +16,16 @@ public class PrescriptionService {
         this.prescriptionRepository = prescriptionRepository;
     }
 
-    public int savePrescription(Prescription prescription) {
+    public ServiceResult savePrescription(Prescription prescription) {
         try {
             List<Prescription> existing = prescriptionRepository.findByAppointmentId(prescription.getAppointmentId());
             if (!existing.isEmpty()) {
-                return -1;
+                return ServiceResult.NOT_FOUND;
             }
             prescriptionRepository.save(prescription);
-            return 1;
+            return ServiceResult.SUCCESS;
         } catch (Exception e) {
-            return 0;
+            return ServiceResult.CONFLICT;
         }
     }
 

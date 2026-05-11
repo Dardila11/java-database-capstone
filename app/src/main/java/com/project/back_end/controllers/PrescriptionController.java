@@ -1,5 +1,6 @@
 package com.project.back_end.controllers;
 
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Prescription;
 import com.project.back_end.services.AppointmentService;
 import com.project.back_end.services.PrescriptionService;
@@ -35,16 +36,16 @@ public class PrescriptionController {
         String token = service.extractToken(authHeader);
         validationService.validateToken(token,"doctor");
 
-        int res = prescriptionService.savePrescription(prescription);
+        ServiceResult res = prescriptionService.savePrescription(prescription);
 
         return switch (res) {
-            case -1 -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "prescription already exists"));
-            case 1 -> {
+            case NOT_FOUND -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "prescription already exists"));
+            case SUCCESS -> {
                 appointmentService.changeStatus(1, prescription.getAppointmentId());
                 yield ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "prescription saved successfully"));
             }
-            case 0 -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to save prescription"));
-            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Server error"));
+            case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to save prescription"));
+            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Server error"));
         };
 
     }

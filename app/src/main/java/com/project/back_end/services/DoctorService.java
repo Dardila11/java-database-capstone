@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.repo.AppointmentRepository;
@@ -51,24 +52,24 @@ public class DoctorService {
         .collect(Collectors.toList());
   }
 
-  public int saveDoctor(Doctor doctor) {
+  public ServiceResult saveDoctor(Doctor doctor) {
     try {
       if (doctorRepository.findByEmail(doctor.getEmail()) != null) {
-        return -1;
+        return ServiceResult.NOT_FOUND;
       }
       doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
       doctorRepository.save(doctor);
-      return 1;
+      return ServiceResult.SUCCESS;
     } catch (Exception e) {
       System.out.println(e.getMessage());
-      return 0;
+      return ServiceResult.CONFLICT;
     }
   }
 
-  public int updateDoctor(Doctor doctor) {
+  public ServiceResult updateDoctor(Doctor doctor) {
     try {
       Doctor existing = doctorRepository.findById(doctor.getId()).orElse(null);
-      if (existing == null) return -1;
+      if (existing == null) return ServiceResult.NOT_FOUND;
       if (doctor.getPassword() != null && !doctor.getPassword().isBlank()) {
         doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
       } else {
@@ -76,9 +77,9 @@ public class DoctorService {
         doctor.setPassword(existing.getPassword());
       }
       doctorRepository.save(doctor);
-      return 1;
+      return ServiceResult.SUCCESS;
     } catch (Exception e) {
-      return 0;
+      return ServiceResult.CONFLICT;
     }
   }
 
@@ -89,17 +90,17 @@ public class DoctorService {
     return doctors;
   }
 
-  public int deleteDoctor(long doctorId) {
+  public ServiceResult deleteDoctor(long doctorId) {
     try {
       if (!doctorRepository.existsById(doctorId)) {
-        return -1;
+        return ServiceResult.NOT_FOUND;
       }
       appointmentRepository.deleteAllByDoctorId(doctorId);
       doctorRepository.deleteById(doctorId);
-      return 1;
+      return ServiceResult.SUCCESS;
     } catch (Exception e) {
       System.out.println(e.getMessage());
-      return 0;
+      return ServiceResult.CONFLICT;
     }
   }
 

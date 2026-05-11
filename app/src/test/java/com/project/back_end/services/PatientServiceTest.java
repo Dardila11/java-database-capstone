@@ -1,13 +1,12 @@
-package com.project.back_end;
+package com.project.back_end.services;
 
 import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
 import com.project.back_end.repo.AppointmentRepository;
 import com.project.back_end.repo.PatientRepository;
-import com.project.back_end.services.PatientService;
-import com.project.back_end.services.TokenService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -74,21 +73,21 @@ public class PatientServiceTest {
     class CreatePatient {
 
         @Test
-        @DisplayName(("returns 1 when save succeeds"))
+        @DisplayName(("returns SUCCESS when save succeeds"))
         void return1OnSucceeds(){
             Patient patient = patient(0L);
             when(patientRepository.save(any(Patient.class))).thenReturn(patient);
 
-            assertThat(patientService.createPatient(patient)).isEqualTo(1);
+            assertThat(patientService.createPatient(patient)).isEqualTo(ServiceResult.SUCCESS);
         }
 
         @Test
-        @DisplayName("returns 0 when repository throws an exception")
+        @DisplayName("returns CONFLICT when repository throws an exception")
         void return0OnRepositoryException(){
             Patient patient = patient(1L);
             when(patientRepository.save(any(Patient.class)))
                     .thenThrow(new RuntimeException("DB error"));
-            assertThat(patientService.createPatient(patient)).isEqualTo(0);
+            assertThat(patientService.createPatient(patient)).isEqualTo(ServiceResult.CONFLICT);
         }
 
     }

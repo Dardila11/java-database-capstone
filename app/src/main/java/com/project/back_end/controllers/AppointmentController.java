@@ -1,6 +1,7 @@
 package com.project.back_end.controllers;
 
 import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.services.AppointmentService;
 import com.project.back_end.services.Service;
@@ -66,15 +67,15 @@ public class AppointmentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Doctor and appointment time are required"));
         }
 
-        int validationResult = service.validateAppointment(appointment.getDoctor().getId(), appointment.getAppointmentTime());
-        if (validationResult == -1) {
+        ServiceResult validationResult = service.validateAppointment(appointment.getDoctor().getId(), appointment.getAppointmentTime());
+        if (validationResult == ServiceResult.NOT_FOUND) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Doctor ID is invalid"));
-        } else if (validationResult == 0) {
+        } else if (validationResult == ServiceResult.CONFLICT) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "The slot is already taken"));
         }
 
-        int bookResult = appointmentService.bookAppointment(appointment);
-        if (bookResult == 1) {
+        ServiceResult bookResult = appointmentService.bookAppointment(appointment);
+        if (bookResult == ServiceResult.SUCCESS) {
             return ResponseEntity.ok(Map.of("message", "Appointment booked successfully"));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to book appointment"));
@@ -96,17 +97,15 @@ public class AppointmentController {
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient");
 
-        int updateResult = appointmentService.updateAppointment(appointment, token);
+        ServiceResult updateResult = appointmentService.updateAppointment(appointment, token);
         return switch (updateResult) {
-            case 1 -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "Appointment updated"));
-            case 0 ->
+            case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "Appointment updated"));
+            case CONFLICT ->
                     ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "The doctor is unavailable at this time"));
-            case -1 ->
+            case NOT_FOUND ->
                     ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "The appointment does not exist"));
-            case -2 ->
+            case UNAUTHORIZED ->
                     ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized access to this appointment"));
-            default ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to update appointment"));
         };
 
     }
@@ -125,17 +124,14 @@ public class AppointmentController {
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient");
 
-        // Returns: 1 = success, 0 = failure, -1 = not found, -2 = unauthorized.
-        int cancelResult = appointmentService.cancelAppointment(id, token);
+        ServiceResult cancelResult = appointmentService.cancelAppointment(id, token);
         return switch (cancelResult) {
-            case 1 -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "Appointment deleted successfully"));
-            case -1 ->
+            case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "Appointment deleted successfully"));
+            case NOT_FOUND ->
                     ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "The appointment does not exist"));
-            case 0 -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Failed to delete appointment"));
-            case -2 ->
+            case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Failed to delete appointment"));
+            case UNAUTHORIZED ->
                     ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized access to this appointment"));
-
-            default -> throw new IllegalStateException("Unexpected value: " + cancelResult);
         };
     }
 
