@@ -55,7 +55,7 @@ public class DoctorService {
   public ServiceResult saveDoctor(Doctor doctor) {
     try {
       if (doctorRepository.findByEmail(doctor.getEmail()) != null) {
-        return ServiceResult.NOT_FOUND;
+        return ServiceResult.DUPLICATE;
       }
       doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
       doctorRepository.save(doctor);

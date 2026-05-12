@@ -20,7 +20,7 @@ public class PrescriptionService {
         try {
             List<Prescription> existing = prescriptionRepository.findByAppointmentId(prescription.getAppointmentId());
             if (!existing.isEmpty()) {
-                return ServiceResult.NOT_FOUND;
+                return ServiceResult.DUPLICATE;
             }
             prescriptionRepository.save(prescription);
             return ServiceResult.SUCCESS;
