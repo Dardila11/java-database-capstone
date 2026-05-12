@@ -39,13 +39,14 @@ public class PrescriptionController {
         ServiceResult res = prescriptionService.savePrescription(prescription);
 
         return switch (res) {
-            case NOT_FOUND -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "prescription already exists"));
             case SUCCESS -> {
                 appointmentService.changeStatus(1, prescription.getAppointmentId());
                 yield ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "prescription saved successfully"));
             }
             case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to save prescription"));
-            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Server error"));
+            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "appointment not found"));
+            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "unauthorized"));
+            case DUPLICATE -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "prescription already exists"));
         };
 
     }

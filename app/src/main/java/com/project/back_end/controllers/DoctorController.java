@@ -76,10 +76,11 @@ public class DoctorController {
         validationService.validateToken(token, "admin");
         ServiceResult saveResult = doctorService.saveDoctor(doctor);
         return switch (saveResult) {
-            case NOT_FOUND -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "doctor already exists"));
             case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor saved successfully"));
-            default ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "failed to save doctor"));
+            case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to save doctor"));
+            case DUPLICATE -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "doctor already exists"));
+            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "unauthorized"));
+            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "doctor not found"));
         };
     }
 
@@ -103,6 +104,7 @@ public class DoctorController {
                 case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error",
                         "doctor does not exist"));
                 case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor updated"));
+                case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to update"));
                 default ->
                         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "failed to update"));
             };

@@ -100,6 +100,7 @@ public class AppointmentController {
         ServiceResult updateResult = appointmentService.updateAppointment(appointment, token);
         return switch (updateResult) {
             case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "Appointment updated"));
+            case DUPLICATE -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "The slot is already taken"));
             case CONFLICT ->
                     ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "The doctor is unavailable at this time"));
             case NOT_FOUND ->
@@ -127,6 +128,7 @@ public class AppointmentController {
         ServiceResult cancelResult = appointmentService.cancelAppointment(id, token);
         return switch (cancelResult) {
             case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "Appointment deleted successfully"));
+            case DUPLICATE -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "The slot is already taken"));
             case NOT_FOUND ->
                     ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "The appointment does not exist"));
             case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Failed to delete appointment"));
