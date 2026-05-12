@@ -76,7 +76,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns SUCCESS when save succeeds")
-        void returns1OnSuccess() {
+        void returnsSuccessWhenSaveSucceeds() {
             Appointment appt = scheduledAppointment(0L, doctor(1L), patient(1L),
                     LocalDateTime.now().plusDays(1));
             when(appointmentRepository.save(any(Appointment.class))).thenReturn(appt);
@@ -86,7 +86,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns CONFLICT when repository throws an exception")
-        void returns0OnRepositoryException() {
+        void returnsConflictWhenRepositoryThrowsException() {
             Appointment appt = scheduledAppointment(0L, doctor(1L), patient(1L),
                     LocalDateTime.now().plusDays(1));
             when(appointmentRepository.save(any(Appointment.class)))
@@ -102,7 +102,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns NOT_FOUND when appointment does not exist")
-        void returnsMinusOneWhenNotFound() {
+        void returnsNotFoundWhenAppointmentDoesNotExist() {
             when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThat(appointmentService.cancelAppointment(99L, TOKEN)).isEqualTo(ServiceResult.NOT_FOUND);
@@ -110,7 +110,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns UNAUTHORIZED when token belongs to a different patient")
-        void returnsMinusTwoForWrongPatient() {
+        void returnsUnauthorizedWhenTokenBelongsToDifferentPatient() {
             Patient owner = patient(1L);
             Patient requester = patient(2L);
             Appointment appt = scheduledAppointment(10L, doctor(1L), owner,
@@ -125,7 +125,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns UNAUTHORIZED when patient is not found in the database")
-        void returnsMinusTwoWhenPatientMissing() {
+        void returnsUnauthorizedWhenPatientNotFoundInDatabase() {
             Appointment appt = scheduledAppointment(10L, doctor(1L), patient(1L),
                     LocalDateTime.now().plusDays(1));
 
@@ -138,7 +138,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns SUCCESS and deletes the record on success")
-        void returns1AndDeletesOnSuccess() {
+        void returnsSuccessAndDeletesRecordOnSuccess() {
             Patient owner = patient(1L);
             Appointment appt = scheduledAppointment(10L, doctor(1L), owner,
                     LocalDateTime.now().plusDays(1));
@@ -160,7 +160,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns NOT_FOUND when appointment does not exist")
-        void returnsMinusOneWhenNotFound() {
+        void returnsNotFoundWhenAppointmentDoesNotExist() {
             Appointment request = new Appointment();
             request.setId(99L);
             when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
@@ -170,7 +170,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns UNAUTHORIZED when token belongs to a different patient")
-        void returnsMinusTwoForWrongPatient() {
+        void returnsUnauthorizedWhenTokenBelongsToDifferentPatient() {
             Patient owner = patient(1L);
             Patient requester = patient(2L);
             Appointment existing = scheduledAppointment(10L, doctor(1L), owner,
@@ -187,7 +187,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns CONFLICT when appointment is already completed (status != 0)")
-        void returns0WhenAlreadyCompleted() {
+        void returnsConflictWhenAppointmentAlreadyCompleted() {
             Patient owner = patient(1L);
             Appointment existing = scheduledAppointment(10L, doctor(1L), owner,
                     LocalDateTime.now().plusDays(1));
@@ -204,7 +204,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns CONFLICT when requested time is not in doctor's available slots")
-        void returns0WhenTimeUnavailable() {
+        void returnsConflictWhenRequestedTimeNotInDoctorAvailableSlots() {
             Patient owner = patient(1L);
             Doctor doc = doctor(1L);
             // availableTimes = ["09:00", "10:00", "14:00"] — 11:30 is not available
@@ -223,7 +223,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns SUCCESS and saves when patient matches, status is 0, and time is available")
-        void returns1AndSavesOnSuccess() {
+        void returnsSuccessAndSavesWhenPatientMatchesStatusIsZeroAndTimeIsAvailable() {
             Patient owner = patient(1L);
             Doctor doc = doctor(1L);
             Appointment existing = scheduledAppointment(10L, doc, owner,
@@ -257,7 +257,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns all appointments for a date when patientName is 'null'")
-        void returnsAllForDateWhenNoPatientFilter() {
+        void returnsAllAppointmentsForDateWhenPatientNameIsNull() {
             Doctor doc = doctor(1L);
             Patient pat = patient(1L);
             Appointment appt = scheduledAppointment(1L, doc, pat,
@@ -276,7 +276,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns filtered appointments when patientName is provided")
-        void returnsFilteredByPatientName() {
+        void returnsFilteredAppointmentsWhenPatientNameIsProvided() {
             Doctor doc = doctor(1L);
             Patient pat = patient(1L);
             Appointment appt = scheduledAppointment(1L, doc, pat,
@@ -296,7 +296,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("returns empty list when no appointments match")
-        void returnsEmptyListWhenNoneFound() {
+        void returnsEmptyListWhenNoAppointmentsMatch() {
             when(appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(
                     eq(1L), any(), any()))
                     .thenReturn(List.of());
@@ -314,7 +314,7 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("delegates to repository with the given status and id")
-        void delegatesToRepository() {
+        void delegatesToRepositoryWithGivenStatusAndId() {
             appointmentService.changeStatus(1, 42L);
             verify(appointmentRepository).updateStatus(1, 42L);
         }
