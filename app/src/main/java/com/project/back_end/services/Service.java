@@ -1,5 +1,6 @@
 package com.project.back_end.services;
 
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
 import com.project.back_end.repo.DoctorRepository;
@@ -79,15 +80,15 @@ public class Service {
 // - If no matching time slot is found, it returns 0 (invalid).
 // - If the doctor doesn’t exist, it returns -1.
 // This logic prevents overlapping or invalid appointment bookings.
-    public int validateAppointment(long doctorId, LocalDateTime appointmentTime) {
+    public ServiceResult validateAppointment(long doctorId, LocalDateTime appointmentTime) {
         if (!doctorRepository.existsById(doctorId)) {
-            return -1;
+            return ServiceResult.NOT_FOUND;
         }
         List<String> availableSlots = doctorService.getDoctorAvailability(doctorId, appointmentTime);
         String requestedStart = String.format("%02d:%02d", appointmentTime.getHour(), appointmentTime.getMinute());
         boolean matched = availableSlots.stream()
                 .anyMatch(slot -> slot.startsWith(requestedStart));
-        return matched ? 1 : 0;
+        return matched ? ServiceResult.SUCCESS : ServiceResult.CONFLICT;
     }
 
 // 7. **validatePatient Method**

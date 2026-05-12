@@ -1,14 +1,13 @@
-package com.project.back_end;
+package com.project.back_end.services;
 
 import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
 import com.project.back_end.repo.AppointmentRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
-import com.project.back_end.services.AppointmentService;
-import com.project.back_end.services.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -76,24 +75,24 @@ class AppointmentServiceTest {
     class BookAppointment {
 
         @Test
-        @DisplayName("returns 1 when save succeeds")
+        @DisplayName("returns SUCCESS when save succeeds")
         void returns1OnSuccess() {
             Appointment appt = scheduledAppointment(0L, doctor(1L), patient(1L),
                     LocalDateTime.now().plusDays(1));
             when(appointmentRepository.save(any(Appointment.class))).thenReturn(appt);
 
-            assertThat(appointmentService.bookAppointment(appt)).isEqualTo(1);
+            assertThat(appointmentService.bookAppointment(appt)).isEqualTo(ServiceResult.SUCCESS);
         }
 
         @Test
-        @DisplayName("returns 0 when repository throws an exception")
+        @DisplayName("returns CONFLICT when repository throws an exception")
         void returns0OnRepositoryException() {
             Appointment appt = scheduledAppointment(0L, doctor(1L), patient(1L),
                     LocalDateTime.now().plusDays(1));
             when(appointmentRepository.save(any(Appointment.class)))
                     .thenThrow(new RuntimeException("DB error"));
 
-            assertThat(appointmentService.bookAppointment(appt)).isEqualTo(0);
+            assertThat(appointmentService.bookAppointment(appt)).isEqualTo(ServiceResult.CONFLICT);
         }
     }
 
@@ -102,15 +101,15 @@ class AppointmentServiceTest {
     class CancelAppointment {
 
         @Test
-        @DisplayName("returns -1 when appointment does not exist")
+        @DisplayName("returns NOT_FOUND when appointment does not exist")
         void returnsMinusOneWhenNotFound() {
             when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThat(appointmentService.cancelAppointment(99L, TOKEN)).isEqualTo(-1);
+            assertThat(appointmentService.cancelAppointment(99L, TOKEN)).isEqualTo(ServiceResult.NOT_FOUND);
         }
 
         @Test
-        @DisplayName("returns -2 when token belongs to a different patient")
+        @DisplayName("returns UNAUTHORIZED when token belongs to a different patient")
         void returnsMinusTwoForWrongPatient() {
             Patient owner = patient(1L);
             Patient requester = patient(2L);
@@ -121,11 +120,11 @@ class AppointmentServiceTest {
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
             when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(requester));
 
-            assertThat(appointmentService.cancelAppointment(10L, TOKEN)).isEqualTo(-2);
+            assertThat(appointmentService.cancelAppointment(10L, TOKEN)).isEqualTo(ServiceResult.UNAUTHORIZED);
         }
 
         @Test
-        @DisplayName("returns -2 when patient is not found in the database")
+        @DisplayName("returns UNAUTHORIZED when patient is not found in the database")
         void returnsMinusTwoWhenPatientMissing() {
             Appointment appt = scheduledAppointment(10L, doctor(1L), patient(1L),
                     LocalDateTime.now().plusDays(1));
@@ -134,11 +133,11 @@ class AppointmentServiceTest {
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
             when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.empty());
 
-            assertThat(appointmentService.cancelAppointment(10L, TOKEN)).isEqualTo(-2);
+            assertThat(appointmentService.cancelAppointment(10L, TOKEN)).isEqualTo(ServiceResult.UNAUTHORIZED);
         }
 
         @Test
-        @DisplayName("returns 1 and deletes the record on success")
+        @DisplayName("returns SUCCESS and deletes the record on success")
         void returns1AndDeletesOnSuccess() {
             Patient owner = patient(1L);
             Appointment appt = scheduledAppointment(10L, doctor(1L), owner,
@@ -148,9 +147,9 @@ class AppointmentServiceTest {
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
             when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
 
-            int result = appointmentService.cancelAppointment(10L, TOKEN);
+            ServiceResult result = appointmentService.cancelAppointment(10L, TOKEN);
 
-            assertThat(result).isEqualTo(1);
+            assertThat(result).isEqualTo(ServiceResult.SUCCESS);
             verify(appointmentRepository).deleteById(10L);
         }
     }
@@ -160,17 +159,17 @@ class AppointmentServiceTest {
     class UpdateAppointment {
 
         @Test
-        @DisplayName("returns -1 when appointment does not exist")
+        @DisplayName("returns NOT_FOUND when appointment does not exist")
         void returnsMinusOneWhenNotFound() {
             Appointment request = new Appointment();
             request.setId(99L);
             when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(-1);
+            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(ServiceResult.NOT_FOUND);
         }
 
         @Test
-        @DisplayName("returns -2 when token belongs to a different patient")
+        @DisplayName("returns UNAUTHORIZED when token belongs to a different patient")
         void returnsMinusTwoForWrongPatient() {
             Patient owner = patient(1L);
             Patient requester = patient(2L);
@@ -183,11 +182,11 @@ class AppointmentServiceTest {
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
             when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(requester));
 
-            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(-2);
+            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(ServiceResult.UNAUTHORIZED);
         }
 
         @Test
-        @DisplayName("returns 0 when appointment is already completed (status != 0)")
+        @DisplayName("returns CONFLICT when appointment is already completed (status != 0)")
         void returns0WhenAlreadyCompleted() {
             Patient owner = patient(1L);
             Appointment existing = scheduledAppointment(10L, doctor(1L), owner,
@@ -200,11 +199,11 @@ class AppointmentServiceTest {
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
             when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
 
-            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(0);
+            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(ServiceResult.CONFLICT);
         }
 
         @Test
-        @DisplayName("returns 0 when requested time is not in doctor's available slots")
+        @DisplayName("returns CONFLICT when requested time is not in doctor's available slots")
         void returns0WhenTimeUnavailable() {
             Patient owner = patient(1L);
             Doctor doc = doctor(1L);
@@ -219,11 +218,11 @@ class AppointmentServiceTest {
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
             when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
 
-            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(0);
+            assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(ServiceResult.CONFLICT);
         }
 
         @Test
-        @DisplayName("returns 1 and saves when patient matches, status is 0, and time is available")
+        @DisplayName("returns SUCCESS and saves when patient matches, status is 0, and time is available")
         void returns1AndSavesOnSuccess() {
             Patient owner = patient(1L);
             Doctor doc = doctor(1L);
@@ -237,9 +236,9 @@ class AppointmentServiceTest {
             when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
             when(appointmentRepository.save(existing)).thenReturn(existing);
 
-            int result = appointmentService.updateAppointment(request, TOKEN);
+            ServiceResult result = appointmentService.updateAppointment(request, TOKEN);
 
-            assertThat(result).isEqualTo(1);
+            assertThat(result).isEqualTo(ServiceResult.SUCCESS);
             assertThat(existing.getAppointmentTime()).isEqualTo(newTime);
             verify(appointmentRepository).save(existing);
         }

@@ -1,4 +1,4 @@
-package com.project.back_end;
+package com.project.back_end.services;
 
 import com.project.back_end.models.Admin;
 import com.project.back_end.models.Doctor;
@@ -6,7 +6,6 @@ import com.project.back_end.models.Patient;
 import com.project.back_end.repo.AdminRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
-import com.project.back_end.services.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

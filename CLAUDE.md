@@ -2,306 +2,119 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
----
+## Build & Run Commands
 
-## Project Overview
-
-**Smart Clinic Management System** is a full-stack web application for managing clinic operations. It exposes a Spring Boot REST API backed by a dual-database architecture (MySQL + MongoDB) and serves a static HTML/JS frontend with some Thymeleaf-rendered dashboard views.
-
-**Role model:** Admin, Doctor, Patient — all authenticated via JWT tokens.
-
----
-
-## Repository Layout
-
-```
-java-database-capstone/
-├── CLAUDE.md
-├── README.md
-├── schema-architecture.md
-└── app/                             # Maven project root
-    ├── pom.xml
-    ├── docker-compose.yml
-    ├── mvnw / mvnw.cmd
-    └── src/
-        ├── main/
-        │   ├── java/com/project/back_end/
-        │   │   ├── BackEndApplication.java
-        │   │   ├── config/           # WebConfig (CORS), SecurityConfig (BCrypt bean)
-        │   │   ├── controllers/      # REST controllers
-        │   │   ├── mvc/              # DashboardController (Thymeleaf)
-        │   │   ├── models/           # JPA entities + Mongo document
-        │   │   ├── repo/             # Spring Data repositories
-        │   │   ├── services/         # Business logic
-        │   │   ├── exceptions/       # Custom exceptions + GlobalExceptionHandler
-        │   │   └── DTO/              # AuthDTO, AppointmentDTO
-        │   └── resources/
-        │       ├── application.properties
-        │       ├── static/           # HTML/CSS/JS frontend
-        │       └── templates/        # Thymeleaf templates
-        └── test/
-            └── java/com/project/back_end/
-                ├── AdminControllerTest.java       # @WebMvcTest slice test
-                ├── AppointmentServiceTest.java    # @ExtendWith(MockitoExtension)
-                ├── PatientServiceTest.java        # @ExtendWith(MockitoExtension)
-                ├── TokenServiceTest.java
-                ├── BackEndApplicationTests.java   # Context load test (needs DBs)
-                └── controllers/
-                    └── PatientControllerTest.java
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Language | Java 17 |
-| Framework | Spring Boot 3.4.4 |
-| Build | Maven (Maven Wrapper included) |
-| Relational DB | MySQL (Spring Data JPA / Hibernate) |
-| Document DB | MongoDB (Spring Data MongoDB) |
-| Auth | JWT (JJWT 0.12.6) |
-| Passwords | BCrypt (`spring-security-crypto`) |
-| Templating | Thymeleaf (admin & doctor dashboards) |
-| Frontend | Vanilla HTML + CSS + JavaScript |
-
----
-
-## Running the Application
-
-### Prerequisites
-
-- Java 17+
-- MySQL and MongoDB (run via Docker Compose or provision manually)
-
-### Docker Compose (recommended)
+All Maven commands must be run from the `app/` directory.
 
 ```bash
 cd app
-# Requires a .env file with JWT_SECRET set
+
+# Run in development mode (Spring DevTools hot-reload)
+./mvnw spring-boot:run
+
+# Build JAR
+./mvnw package
+
+# Run all tests
+./mvnw test
+
+# Run a single test class
+./mvnw test -Dtest=PatientControllerTest
+
+# Run a single test method
+./mvnw test -Dtest=PatientControllerTest#loggedIn_returns200
+```
+
+### Docker (full stack)
+
+```bash
+cd app
 docker compose up --build
 ```
 
-The compose file starts `mysql:8.0`, `mongo:6.0`, and the Spring Boot app on port 8080. It wires the datasource URLs automatically via environment variables.
+This starts the Spring Boot app, MySQL (`cms` DB on port 3306), and MongoDB (port 27017). Requires a `.env` file with `JWT_SECRET` set.
 
-### Manual / Local Dev
+## Environment Variables
 
-All runtime configuration lives in `app/src/main/resources/application.properties` and is driven entirely by environment variables:
+All runtime config is injected via environment variables (see `app/src/main/resources/application.properties`):
 
-```
-SPRING_DATASOURCE_URL=jdbc:mysql://<host>/cms?createDatabaseIfNotExist=true&useSSL=false
-SPRING_DATASOURCE_USERNAME=root
-SPRING_DATASOURCE_PASSWORD=<password>
-SPRING_DATA_MONGODB_URI=mongodb://<host>:27017/prescriptions
-JWT_SECRET=<secret>
-```
-
-```bash
-cd app
-./mvnw spring-boot:run    # hot-reload via DevTools
-```
-
-### Build Commands
-
-```bash
-cd app
-./mvnw package                                          # build JAR
-./mvnw test                                             # run all tests
-./mvnw test -Dtest=AppointmentServiceTest               # run one test class
-./mvnw test -Dtest=AppointmentServiceTest#returns1*     # run one test method
-```
-
-> **Note:** `BackEndApplicationTests` (context load test) requires live MySQL and MongoDB connections. All other tests (`@WebMvcTest`, `@ExtendWith(MockitoExtension.class)`) run without databases.
-
----
+| Variable | Purpose |
+|---|---|
+| `SPRING_DATASOURCE_URL` | MySQL JDBC URL (e.g. `jdbc:mysql://localhost:3306/cms?useSSL=false`) |
+| `SPRING_DATASOURCE_USERNAME` | MySQL user |
+| `SPRING_DATASOURCE_PASSWORD` | MySQL password |
+| `SPRING_DATA_MONGODB_URI` | MongoDB URI (e.g. `mongodb://localhost:27017/prescriptions`) |
+| `JWT_SECRET` | Secret key for signing JWTs (must be set) |
 
 ## Architecture
 
-### Data Flow
+### Dual-Database Design
+
+- **MySQL** (Spring Data JPA / Hibernate): `Patient`, `Doctor`, `Appointment`, `Admin` — relational entities with `ddl-auto=update`.
+- **MongoDB** (Spring Data MongoDB): `Prescription` documents in the `prescriptions` collection. `Prescription.java` uses `@Document`, not `@Entity`.
+
+### Request Flow
 
 ```
-HTTP Request
-  → Controller         (delegates auth to ValidationService)
-  → ValidationService  (throws typed exceptions; never returns null on failure)
-  → Service            (business logic, delegates to repositories)
-  → Repository         (Spring Data JPA or MongoDB)
-  → Database           (MySQL or MongoDB)
+HTTP → Controller → ValidationService (token) → Service / XxxService → Repository → DB
 ```
 
-### Dual-Database Strategy
+Controllers delegate auth to `ValidationService`, business logic to the appropriate domain service, and cross-cutting filtering/validation to the shared `Service` bean.
 
-- **MySQL** stores all structured relational data: `Patient`, `Doctor`, `Appointment`, `Admin`.
-- **MongoDB** stores flexible prescription documents (`Prescription` collection `prescriptions`).
+### Service Layer Structure
 
-Hibernate DDL is set to `update` — schema changes are applied automatically on startup.
+- **`ValidationService`** — all login validation and token assertion. Throws `InvalidCredentialsException` or `InvalidTokenException` (caught by `GlobalExceptionHandler`) rather than returning status codes.
+- **`TokenService`** — JWT generation/validation using JJWT. Token subject is the user's email (or admin username). Role validation hits the DB on every check.
+- **`Service`** (the generic bean) — cross-entity helpers: `extractToken`, `filterDoctor`, `validateAppointment` (returns int code), `filterPatient`.
+- **`AppointmentService`**, **`DoctorService`**, **`PatientService`**, **`PrescriptionService`** — domain-specific CRUD and filtering.
 
-### Authentication & Authorization
+### Integer Return Code Convention
 
-All protected endpoints receive a JWT token (typically as a path variable `{token}`).
+Several service methods return `int` codes instead of throwing exceptions:
 
-- **`ValidationService`** — central auth service injected into controllers. Validates credentials and tokens; throws `InvalidCredentialsException` or `InvalidTokenException` on failure (never returns null).
-- **`TokenService`** — `@Component` for JWT creation (`generateToken`) and parsing (`extractEmail`, `validateToken`).
-- Tokens are valid for **7 days** and encode the user's email.
-- Role authorization: `admin`, `doctor`, `patient` checked per-endpoint via `ValidationService.validateToken(token, role)`.
+| Code | Meaning |
+|---|---|
+| `1` | Success |
+| `0` | Conflict / failure |
+| `-1` | Not found |
+| `-2` | Unauthorized |
 
-### Password Handling
+Controllers switch on these codes to produce appropriate HTTP responses.
 
-Passwords use BCrypt (`SecurityConfig` exposes a `PasswordEncoder` bean). `ValidationService` applies a **lazy migration** on login: if the stored password is plain-text, it BCrypt-hashes it and re-saves before issuing the token.
+### Authentication
+
+- JWT is passed in the `Authorization: Bearer <token>` header for REST endpoints.
+- Thymeleaf MVC dashboards receive the token as a `?token=<jwt>` query parameter.
+- There is **no Spring Security filter chain** — token validation is manual, per-endpoint, via `ValidationService.validateToken(token, role)`.
+- Passwords are BCrypt-hashed; `ValidationService` contains a plain-text migration path for legacy records (encode on first successful login).
 
 ### Exception Handling
 
-`GlobalExceptionHandler` (`@RestControllerAdvice`) centralizes all error responses:
+`GlobalExceptionHandler` (`@RestControllerAdvice`) maps all custom exceptions to JSON responses:
+- `InvalidCredentialsException` → 401
+- `InvalidTokenException` → 401
+- `NotFoundException` → 404
+- `MethodArgumentNotValidException` → 400 (field-level validation messages joined by `,`)
+- `HttpMessageNotReadableException` → 400
 
-| Exception | HTTP Status | Body key |
-|---|---|---|
-| `InvalidCredentialsException` | 401 | `error` |
-| `InvalidTokenException` | 401 | `error` |
-| `NotFoundException` | 404 | `error` |
-| `MethodArgumentNotValidException` | 400 | `error` (field:message CSV) |
-| `HttpMessageNotReadableException` | 400 | `error` |
-| `Exception` (catch-all) | 500 | `error` |
+### DTOs
 
-Do not add additional `@ExceptionHandler` methods in controllers — route all exceptions through `GlobalExceptionHandler`.
+- `AppointmentDTO` — flattened appointment view for API responses; hides entity graphs and sensitive fields. Has a static `from(Appointment)` factory.
+- `AuthDTO` — contains nested records `LoginRequest`, `AdminLoginRequest`, `LoginResponse`.
 
-### CORS
+### Frontend
 
-`WebConfig` permits all origins (`*`), all standard HTTP methods, and all headers. Intentionally permissive for development.
+Two frontend layers co-exist:
 
----
+1. **Static HTML/JS SPA** (`app/src/main/resources/static/`) — vanilla HTML + CSS + JS. `index.html` is the entry point. JS is split into `js/config/` (API base URL), `js/services/` (API wrappers), and `js/components/` (DOM utilities).
+2. **Thymeleaf dashboards** (`app/src/main/resources/templates/`) — server-rendered dashboards for `admin/`, `doctor/`, and `loggedPatient/` roles, served by `DashboardController`.
 
-## Package Conventions
+### Doctor Availability Logic
 
-### `models/`
+`DoctorService.getDoctorAvailability` computes free slots by comparing the doctor's `availableTimes` list (stored as `"HH:mm-HH:mm"` strings via `@ElementCollection`) against already-booked appointments on the requested date.
 
-JPA entities use `@Entity` + `@Table`. MongoDB document uses `@Document(collection = "prescriptions")`.
+## Testing Patterns
 
-- Validation annotations (`@NotBlank`, `@Email`, `@Size`, `@Pattern`) are on model fields.
-- Password fields: `@JsonProperty(access = WRITE_ONLY)` — never serialized in responses.
-- `Appointment` has `@Transient` derived fields (`endTime`, `appointmentDate`, `appointmentTimeOnly`) computed from `appointmentTime`.
-- `Doctor.availableTimes` is an `@ElementCollection` stored as a separate table.
-
-### `repo/`
-
-All repositories extend either `JpaRepository` (MySQL) or `MongoRepository` (MongoDB). Custom query methods use Spring Data naming conventions or `@Query` annotations.
-
-Notable custom methods:
-- `DoctorRepository.findByNameContainingIgnoreCase`
-- `AppointmentRepository` — filtering queries combining doctor, date, patient name, status
-- `PrescriptionRepository.findByAppointmentId`
-
-### `services/`
-
-- `ValidationService` — handles all login and token validation; throws typed exceptions; inject this in controllers for auth checks.
-- `Service.java` — older shared service; contains appointment filtering logic.
-- `TokenService` — JWT generation/parsing only.
-- `PatientService`, `DoctorService`, `AppointmentService`, `PrescriptionService` — business logic per domain, call repositories directly.
-
-### `DTO/`
-
-- `AuthDTO` — nested records: `AdminLoginRequest` (username + password), `LoginRequest` (email + password), `LoginResponse` (token). All fields carry `@NotBlank`/`@Email` validation.
-- `AppointmentDTO` — flattened view of an appointment (avoids circular serialization, hides sensitive fields).
-
----
-
-## API Endpoints Reference
-
-### Admin
-
-| Method | Path | Description |
-|---|---|---|
-| POST | `/admin/login` | Admin login, returns JWT |
-
-### Doctor
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/doctor` | List all doctors |
-| GET | `/doctor/filter/{name}/{time}/{speciality}` | Filter doctors |
-| GET | `/doctor/{userId}/{doctorId}/{date}/{token}` | Get doctor with availability for date |
-| POST | `/doctor/{token}` | Create doctor (admin only) |
-| PUT | `/doctor/{token}` | Update doctor (admin only) |
-| DELETE | `/doctor/{doctorId}/{token}` | Delete doctor (admin only) |
-
-### Patient
-
-| Method | Path | Description |
-|---|---|---|
-| POST | `/patient` | Register patient |
-| POST | `/patient/login` | Patient login, returns JWT |
-| GET | `/patient/{token}` | Get patient by token |
-| GET | `/patient/{patientId}/{token}/appointments` | Get patient's appointments |
-| GET | `/patient/{patientId}/{token}/filter` | Filter patient's appointments |
-
-### Appointment
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/appointments/{date}/{patientName}/{token}` | Doctor's appointments (filtered) |
-| POST | `/appointments/{token}` | Book appointment |
-| PUT | `/appointments/{token}` | Update appointment |
-| DELETE | `/appointments/{appointmentId}/{token}` | Cancel appointment |
-
-### Prescription
-
-| Method | Path | Description |
-|---|---|---|
-| POST | `/prescription/{token}` | Save prescription (doctor only) |
-| GET | `/prescription/{appointmentId}/{token}` | Get prescription by appointment |
-
-### MVC Dashboard Views
-
-| Method | Path | Template |
-|---|---|---|
-| GET | `/adminDashboard/{token}` | `templates/admin/adminDashboard.html` |
-| GET | `/doctorDashboard/{token}` | `templates/doctor/doctorDashboard.html` |
-
----
-
-## Frontend Structure
-
-Static assets are served from `src/main/resources/static/`.
-
-```
-static/
-├── index.html                       # Landing / role selection
-├── pages/                           # Patient-facing HTML pages
-├── js/
-│   ├── config/config.js             # API base URL config
-│   ├── services/                    # API call wrappers (fetch)
-│   ├── components/                  # Reusable DOM-building functions
-│   └── *.js                         # Page-level scripts
-└── css/                             # Per-page stylesheets
-```
-
-Admin and Doctor dashboards are Thymeleaf views (under `templates/`); all patient-facing pages are static HTML with JavaScript fetching the REST API.
-
----
-
-## Key Conventions
-
-1. **Token as path variable** — Most protected endpoints take `{token}` as the last path segment. Call `ValidationService.validateToken(token, role)` before performing the operation.
-2. **Appointment status** — `0` = scheduled, `1` = completed. No enum — integer constants only.
-3. **No migration scripts** — Schema is managed by Hibernate `ddl-auto=update`.
-4. **MongoDB IDs are Strings** — `Prescription.id` is a `String` mapped to MongoDB's `ObjectId`.
-5. **DTO for responses** — Use `AppointmentDTO` when returning appointment data to avoid circular references and to hide patient/doctor passwords.
-6. **Validation errors** — `GlobalExceptionHandler` returns `Map<String, String>` with a single `"error"` key. All `@Valid`-annotated controller parameters produce a 400 with field errors joined as `field:message` CSV in that key.
-
----
-
-## Test Patterns
-
-Two test styles are used; choose based on what you're testing:
-
-**Service unit tests** (`@ExtendWith(MockitoExtension.class)`): use `@Mock` + `@InjectMocks`. No Spring context. Fast, no database needed. See `AppointmentServiceTest`, `PatientServiceTest`.
-
-**Controller slice tests** (`@WebMvcTest(XController.class)`): use `@MockitoBean` to stub service dependencies. MockMvc drives HTTP. Requires `@TestPropertySource(properties = "api.path=/")`. See `AdminControllerTest`, `PatientControllerTest`.
-
----
-
-## Known Limitations / Tech Debt
-
-- Hibernate `ddl-auto=update` is not suitable for production; consider Flyway or Liquibase.
-- CORS is fully open (`*`) — restrict for production deployments.
-- No API versioning strategy in place.
-- Some older passwords may still be stored as plain text until the user logs in (lazy BCrypt migration).
+- **Controller tests** use `@WebMvcTest` + `MockMvc` + `@MockitoBean` for service dependencies. See `PatientControllerTest` and `AdminControllerTest`.
+- **Service tests** and **integration tests** exist alongside unit tests in `src/test/`.
+- `@TestPropertySource(properties = "api.path=/")` is required on controller tests because `api.path` has no default.

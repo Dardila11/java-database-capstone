@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
@@ -37,37 +38,34 @@ public class AppointmentService {
     this.tokenService = tokenService;
   }
 
-  // Saves a new appointment; returns 1 on success, 0 on failure.
+  // Saves a new appointment; returns SUCCESS on success, CONFLICT on failure.
   @Transactional
-  public int bookAppointment(Appointment appointment) {
+  public ServiceResult bookAppointment(Appointment appointment) {
     try {
       appointmentRepository.save(appointment);
-      return 1;
+      return ServiceResult.SUCCESS;
     } catch (Exception e) {
-      return 0;
+      return ServiceResult.CONFLICT;
     }
   }
 
-  // Validates patient ownership, appointment status, and doctor availability
-  // before persisting the updated appointment time.
-  // Returns: 1 = success, 0 = conflict/unavailable, -1 = not found, -2 = unauthorized.
   @Transactional
-  public int updateAppointment(Appointment appointment, String token) {
+  public ServiceResult updateAppointment(Appointment appointment, String token) {
     try {
       Optional<Appointment> existingOpt = appointmentRepository.findById(appointment.getId());
       if (existingOpt.isEmpty()) {
-        return -1;
+        return ServiceResult.NOT_FOUND;
       }
       Appointment existing = existingOpt.get();
 
       String email = tokenService.extractEmail(token);
       Optional<Patient> patient = patientRepository.findByEmail(email);
       if (patient.isEmpty() || !patient.get().getId().equals(existing.getPatient().getId())) {
-        return -2;
+        return ServiceResult.UNAUTHORIZED;
       }
 
       if (existing.getStatus() != 0) {
-        return 0;
+        return ServiceResult.CONFLICT;
       }
 
       Doctor doctor = existing.getDoctor();
@@ -78,40 +76,38 @@ public class AppointmentService {
           doctor.getAvailableTimes().stream().anyMatch(slot -> slot.startsWith(timeStr));
 
       if (!doctorAvailable) {
-        return 0;
+        return ServiceResult.CONFLICT;
       }
 
       existing.setAppointmentTime(appointment.getAppointmentTime());
       appointmentRepository.save(existing);
-      return 1;
+      return ServiceResult.SUCCESS;
     } catch (Exception e) {
       System.out.println(e.getMessage());
-      return 0;
+      return ServiceResult.CONFLICT;
     }
   }
 
-  // Verifies the token belongs to the appointment's patient before deleting.
-  // Returns: 1 = success, 0 = failure, -1 = not found, -2 = unauthorized.
   @Transactional
-  public int cancelAppointment(long appointmentId, String token) {
+  public ServiceResult cancelAppointment(long appointmentId, String token) {
     try {
       Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
       if (appointmentOpt.isEmpty()) {
-        return -1;
+        return ServiceResult.NOT_FOUND;
       }
       Appointment appointment = appointmentOpt.get();
 
       String email = tokenService.extractEmail(token);
       Optional<Patient> patient = patientRepository.findByEmail(email);
       if (patient.isEmpty() || !patient.get().getId().equals(appointment.getPatient().getId())) {
-        return -2;
+        return ServiceResult.UNAUTHORIZED;
       }
 
       appointmentRepository.deleteById(appointmentId);
-      return 1;
+      return ServiceResult.SUCCESS;
     } catch (Exception e) {
       System.out.println(e.getMessage());
-      return 0;
+      return ServiceResult.CONFLICT;
     }
   }
 

@@ -1,6 +1,7 @@
 package com.project.back_end.controllers;
 
 import com.project.back_end.DTO.AuthDTO;
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Patient;
 import com.project.back_end.services.PatientService;
 import com.project.back_end.services.Service;
@@ -38,7 +39,7 @@ public class PatientController {
             return ResponseEntity.badRequest().body(Map.of("error", "Patient with this email or phone already exists"));
         }
 
-        if (patientService.createPatient(patient) == 1) {
+        if (patientService.createPatient(patient) == ServiceResult.SUCCESS) {
             return ResponseEntity.ok(Map.of("message", "Patient created successfully"));
         } else {
             return ResponseEntity.internalServerError().body(Map.of("error", "Failed to create patient"));

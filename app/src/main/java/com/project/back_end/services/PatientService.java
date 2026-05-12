@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
@@ -33,13 +34,13 @@ public class PatientService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public int createPatient(Patient patient) {
+    public ServiceResult createPatient(Patient patient) {
         try {
             patient.setPassword(passwordEncoder.encode(patient.getPassword()));
             patientRepository.save(patient);
-            return 1;
+            return ServiceResult.SUCCESS;
         } catch (Exception e) {
-            return 0;
+            return ServiceResult.CONFLICT;
         }
     }
 

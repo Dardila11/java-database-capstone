@@ -2,6 +2,7 @@ package com.project.back_end.controllers;
 
 
 import com.project.back_end.DTO.AuthDTO;
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.services.DoctorService;
 import com.project.back_end.services.Service;
@@ -73,12 +74,13 @@ public class DoctorController {
         // validate token
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, "admin");
-        int saveResult = doctorService.saveDoctor(doctor);
+        ServiceResult saveResult = doctorService.saveDoctor(doctor);
         return switch (saveResult) {
-            case -1 -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "doctor already exists"));
-            case 1 -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor saved successfully"));
-            default ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "failed to save doctor"));
+            case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor saved successfully"));
+            case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to save doctor"));
+            case DUPLICATE -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "doctor already exists"));
+            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "unauthorized"));
+            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "doctor not found"));
         };
     }
 
@@ -97,12 +99,12 @@ public class DoctorController {
         ){
             String token = service.extractToken(authHeader);
             validationService.validateToken(token, "admin");
-            int updateResult = doctorService.updateDoctor(doctor);
+            ServiceResult updateResult = doctorService.updateDoctor(doctor);
             return switch (updateResult) {
-
-                case -1 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error",
+                case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error",
                         "doctor does not exist"));
-                case 1 -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor updated"));
+                case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor updated"));
+                case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to update"));
                 default ->
                         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "failed to update"));
             };
@@ -121,10 +123,10 @@ public class DoctorController {
     ) {
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, "admin");
-        int deleteResult = doctorService.deleteDoctor(id);
+        ServiceResult deleteResult = doctorService.deleteDoctor(id);
         return switch (deleteResult) {
-            case -1 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "doctor does not exist"));
-            case 1 -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor deleted successfully"));
+            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "doctor does not exist"));
+            case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor deleted successfully"));
             default ->
                     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "failed to delete doctor"));
         };
