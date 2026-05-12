@@ -13,8 +13,7 @@ import com.project.back_end.repo.AppointmentRepository;
 import com.project.back_end.repo.DoctorRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import jakarta.transaction.Transactional;
-
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DoctorService {
   private final DoctorRepository doctorRepository;
@@ -61,7 +60,6 @@ public class DoctorService {
       doctorRepository.save(doctor);
       return ServiceResult.SUCCESS;
     } catch (Exception e) {
-      System.out.println(e.getMessage());
       return ServiceResult.CONFLICT;
     }
   }

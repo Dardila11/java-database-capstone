@@ -83,7 +83,6 @@ public class AppointmentService {
       appointmentRepository.save(existing);
       return ServiceResult.SUCCESS;
     } catch (Exception e) {
-      System.out.println(e.getMessage());
       return ServiceResult.CONFLICT;
     }
   }
