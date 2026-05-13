@@ -30,7 +30,7 @@ public class AdminController {
     @PostMapping("/login")
     @Operation(
             summary = "Login Admin User",
-            description = "Authenticate a admin user and return a authentication token",
+            description = "Authenticate an admin user and return a authentication token",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Authentication request with username and password",
                     required = true,
@@ -39,16 +39,24 @@ public class AdminController {
                             schema = @Schema(implementation = AuthDTO.AdminLoginRequest.class)
                     )
             ),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "Successful authentication",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(
-                                    implementation = Map.class
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successful authentication",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = "{\"token\": \"some.jwt.token\"}")
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Invalid username or password",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = "{\"error\": \"Invalid credentials\"}")
                             )
                     )
-            )
+            }
 
     )
     public ResponseEntity<Map<String, String>> adminLogin(@Valid @RequestBody AuthDTO.AdminLoginRequest adminLoginRequest) {
