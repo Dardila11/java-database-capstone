@@ -7,14 +7,8 @@ import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-
-import static org.springframework.http.ResponseEntity.ok;
 
 @org.springframework.stereotype.Service
 public class Service {
@@ -33,26 +27,39 @@ public class Service {
         this.patientService = patientService;
     }
 
+    /**
+     * Strips the {@code Bearer } prefix from an Authorization header value.
+     *
+     * @param authHeader the raw Authorization header (may be {@code null})
+     * @return the bare JWT string, or the original value if the prefix is absent
+     */
     public String extractToken(String authHeader) {
         return (authHeader != null && authHeader.startsWith("Bearer "))
                 ? authHeader.substring(7)
                 : authHeader;
     }
 
-
-    public ResponseEntity<Map<String, String>> validateToken(String token, String role) {
-        boolean valid = tokenService.validateToken(token, role);
-        if (!valid) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid or expired token"));
-        }
-        return ok(Map.of("message", "Token is valid"));
+    /**
+     * Returns whether the given JWT is valid for the specified role.
+     * Used by Thymeleaf dashboard controllers to gate page access without throwing exceptions.
+     *
+     * @param token the JWT to validate
+     * @param role  the required role (e.g. {@code "patient"}, {@code "doctor"})
+     * @return {@code true} if the token is valid and matches the role, {@code false} otherwise
+     */
+    public boolean validateToken(String token, String role) {
+        return tokenService.validateToken(token, role);
     }
 
-// 5. **filterDoctor Method**
-// This method provides filtering functionality for doctors based on name, specialty, and available time slots.
-// - It supports various combinations of the three filters.
-// - If none of the filters are provided, it returns all available doctors.
-// This flexible filtering mechanism allows the frontend or consumers of the API to search and narrow down doctors based on user criteria.
+    /**
+     * Returns doctors matching any combination of name, speciality, and available time slot.
+     * Falls back to all doctors when no filters are supplied.
+     *
+     * @param name      partial or full doctor name (nullable/empty to skip)
+     * @param speciality medical speciality (nullable/empty to skip)
+     * @param time      desired time slot in {@code HH:mm} format (nullable/empty to skip)
+     * @return filtered (and optionally time-narrowed) list of {@link Doctor} records
+     */
     public List<Doctor> filterDoctor(String name, String speciality, String time) {
         boolean hasName = name != null && !name.isEmpty();
         boolean hasSpeciality = speciality != null && !speciality.isEmpty();
@@ -72,15 +79,15 @@ public class Service {
         return hasTime ? doctorService.filterDoctorByTime(doctors, time) : doctors;
     }
 
-// 6. **validateAppointment Method**
-// This method validates if the requested appointment time for a doctor is available.
-// - It first checks if the doctor exists in the repository.
-// - Then, it retrieves the list of available time slots for the doctor on the specified date.
-// - It compares the requested appointment time with the start times of these slots.
-// - If a match is found, it returns 1 (valid appointment time).
-// - If no matching time slot is found, it returns 0 (invalid).
-// - If the doctor doesn’t exist, it returns -1.
-// This logic prevents overlapping or invalid appointment bookings.
+    /**
+     * Checks whether a requested appointment time is available for a doctor.
+     *
+     * @param doctorId        the ID of the doctor
+     * @param appointmentTime the requested date and time
+     * @return {@link ServiceResult#SUCCESS} if the slot is free,
+     *         {@link ServiceResult#CONFLICT} if the slot is already taken,
+     *         {@link ServiceResult#NOT_FOUND} if the doctor does not exist
+     */
     public ServiceResult validateAppointment(long doctorId, LocalDateTime appointmentTime) {
         if (!doctorRepository.existsById(doctorId)) {
             return ServiceResult.NOT_FOUND;
@@ -92,21 +99,28 @@ public class Service {
         return matched ? ServiceResult.SUCCESS : ServiceResult.CONFLICT;
     }
 
-// 7. **validatePatient Method**
-// This method checks whether a patient with the same email or phone number already exists in the system.
-// - If a match is found, it returns false (indicating the patient is not valid for new registration).
-// - If no match is found, it returns true.
-// This helps enforce uniqueness constraints on patient records and prevent duplicate entries.
+    /**
+     * Returns {@code true} when a patient with the given email or phone exists,
+     * enforcing uniqueness before registration.
+     *
+     * @param email the patient email address
+     * @param phone the patient phone number
+     * @return {@code true} if the combination is unique, {@code false} if a duplicate is found
+     */
     public boolean validatePatient(String email, String phone) {
         return patientRepository.findByEmailOrPhone(email, phone) == null;
     }
 
-// 9. **filterPatient Method**
-// This method filters a patient's appointment history based on condition and Doctor name.
-// - It extracts the email from the JWT token to identify the patient.
-// - Depending on which filters (condition, doctor name) are provided, it delegates the filtering logic to PatientService.
-// - If no filters are provided, it retrieves all appointments for the patient.
-// This flexible method supports patient-specific querying and enhances user experience on the client side.
+    /**
+     * Returns the authenticated patient's appointments, optionally filtered by condition and/or doctor name.
+     *
+     * @param token      the patient's JWT (used to resolve their identity)
+     * @param condition  {@code "past"} or {@code "future"} (nullable/empty to skip); throws
+     *                   {@link IllegalArgumentException} for any other value
+     * @param doctorName partial or full doctor name (nullable/empty to skip)
+     * @return matching {@link AppointmentDTO} list; all appointments when no filters are supplied
+     * @throws NotFoundException if the token's email does not match any patient
+     */
     public List<AppointmentDTO> filterPatient(String token, String condition, String doctorName) {
         String email = tokenService.extractEmail(token);
         Patient patient = patientRepository.findByEmail(email)
