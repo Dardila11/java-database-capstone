@@ -70,6 +70,6 @@ public class PatientController {
 
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient"); // throws exception if not valid
-        return service.filterPatient(token, condition, name);
+        return ResponseEntity.ok(Map.of("appointments", service.filterPatient(token, condition, name)));
     }
 }

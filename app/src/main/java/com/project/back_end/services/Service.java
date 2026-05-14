@@ -2,6 +2,7 @@ package com.project.back_end.services;
 
 import com.project.back_end.DTO.AppointmentDTO;
 import com.project.back_end.enums.ServiceResult;
+import com.project.back_end.exceptions.NotFoundException;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
 import com.project.back_end.repo.DoctorRepository;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -107,27 +107,23 @@ public class Service {
 // - Depending on which filters (condition, doctor name) are provided, it delegates the filtering logic to PatientService.
 // - If no filters are provided, it retrieves all appointments for the patient.
 // This flexible method supports patient-specific querying and enhances user experience on the client side.
-    public ResponseEntity<Map<String, Object>> filterPatient(String token, String condition, String doctorName) {
+    public List<AppointmentDTO> filterPatient(String token, String condition, String doctorName) {
         String email = tokenService.extractEmail(token);
-        Optional<Patient> patient = patientRepository.findByEmail(email);
-        if (patient.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid or expired token"));
-        }
-        long patientId = patient.get().getId();
+        Patient patient = patientRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Patient not found"));
+        long patientId = patient.getId();
 
         boolean hasCondition = condition != null && !condition.isEmpty();
         boolean hasDoctorName = doctorName != null && !doctorName.isEmpty();
 
-        List<AppointmentDTO> appointments;
         if (hasCondition && hasDoctorName) {
-            appointments = patientService.filterByDoctorAndCondition(doctorName, patientId, condition);
+            return patientService.filterByDoctorAndCondition(doctorName, patientId, condition);
         } else if (hasCondition) {
-            appointments = patientService.filterByCondition(patientId, condition);
+            return patientService.filterByCondition(patientId, condition);
         } else if (hasDoctorName) {
-            appointments = patientService.filterByDoctor(doctorName, patientId);
+            return patientService.filterByDoctor(doctorName, patientId);
         } else {
-            appointments = patientService.getPatientAppointments(patientId);
+            return patientService.getPatientAppointments(patientId);
         }
-        return ResponseEntity.ok(Map.of("appointments", appointments));
     }
 }
