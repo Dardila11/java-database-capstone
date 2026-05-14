@@ -13,6 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Handles authentication validation for all user roles (patient, admin, doctor)
+ * and JWT token assertion. Throws typed exceptions caught by {@link com.project.back_end.exceptions.GlobalExceptionHandler}
+ * rather than returning status codes.
+ */
 @Service
 public class ValidationService {
 
@@ -32,17 +37,29 @@ public class ValidationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    ///  Validate token
-    ///  If not valid, throws exception InvalidTokenException("Invalid token")
+    /**
+     * Asserts that a JWT token is valid for the given role.
+     * Role validation hits the database on every call.
+     *
+     * @param token the Bearer token from the {@code Authorization} header
+     * @param role  the expected role (e.g. {@code "patient"}, {@code "admin"}, {@code "doctor"})
+     * @throws com.project.back_end.exceptions.InvalidTokenException if the token is missing, expired, or does not match the role
+     */
     public void validateToken(String token, String role) {
         boolean isValid = tokenService.validateToken(token, role);
         if(!isValid) throw new InvalidTokenException("Invalid token");
     }
 
-    public boolean validatePatient(String email, String phone) {
-        return patientRepository.findByEmailOrPhone(email, phone) == null;
-    }
-
+    /**
+     * Validates patient credentials and returns a JWT on success.
+     * If the stored password is plain-text (legacy record), it is migrated to BCrypt
+     * on the first successful login.
+     *
+     * @param email    the patient's email address
+     * @param password the raw password supplied by the patient
+     * @return a signed JWT whose subject is the patient's email
+     * @throws com.project.back_end.exceptions.InvalidCredentialsException if no patient with the given email exists or the password does not match
+     */
     public String validatePatientLogin(String email, String password) {
         Optional<Patient> opt = patientRepository.findByEmail(email);
         if (opt.isEmpty()) throw new InvalidCredentialsException("Invalid email or password");
@@ -62,6 +79,16 @@ public class ValidationService {
         return tokenService.generateToken(patient.getEmail());
     }
 
+    /**
+     * Validates admin credentials and returns a JWT on success.
+     * If the stored password is plain-text (legacy record), it is migrated to BCrypt
+     * on the first successful login.
+     *
+     * @param username the admin's username
+     * @param password the raw password supplied by the admin
+     * @return a signed JWT whose subject is the admin's username
+     * @throws com.project.back_end.exceptions.InvalidCredentialsException if no admin with the given username exists or the password does not match
+     */
     public String validateAdminLogin(String username, String password) {
         Admin admin = adminRepository.findByUsername(username);
         if (admin == null) throw new InvalidCredentialsException("Invalid username or password");
@@ -79,6 +106,16 @@ public class ValidationService {
         return tokenService.generateToken(admin.getUsername());
     }
 
+    /**
+     * Validates doctor credentials and returns a JWT on success.
+     * If the stored password is plain-text (legacy record), it is migrated to BCrypt
+     * on the first successful login.
+     *
+     * @param email    the doctor's email address
+     * @param password the raw password supplied by the doctor
+     * @return a signed JWT whose subject is the doctor's email
+     * @throws com.project.back_end.exceptions.InvalidCredentialsException if no doctor with the given email exists or the password does not match
+     */
     public String validateDoctorLogin(String email, String password) {
         Doctor doctor = doctorRepository.findByEmail(email);
         if (doctor == null) throw new InvalidCredentialsException("Invalid email or password");
