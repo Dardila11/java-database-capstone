@@ -1,15 +1,11 @@
 package com.project.back_end.services;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.exceptions.NotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,70 +48,36 @@ public class PatientService {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<Map<String, Object>> filterByCondition(long patientId, String condition) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            int status;
-            if ("past".equalsIgnoreCase(condition)) {
-                status = 1;
-            } else if ("future".equalsIgnoreCase(condition)) {
-                status = 0;
-            } else {
-                response.put("message", "Invalid condition: use 'past' or 'future'");
-                return ResponseEntity.badRequest().body(response);
-            }
-            List<AppointmentDTO> appointments = appointmentRepository
-                    .findByPatient_IdAndStatusOrderByAppointmentTimeAsc(patientId, status)
-                    .stream()
-                    .map(AppointmentDTO::from)
-                    .collect(Collectors.toList());
-            response.put("appointments", appointments);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("message", "Internal server error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+    public List<AppointmentDTO> filterByCondition(long patientId, String condition) {
+        int status = parseConditionStatus(condition);
+        return appointmentRepository
+                .findByPatient_IdAndStatusOrderByAppointmentTimeAsc(patientId, status)
+                .stream()
+                .map(AppointmentDTO::from)
+                .collect(Collectors.toList());
     }
 
-    public ResponseEntity<Map<String, Object>> filterByDoctor(String doctorName, long patientId) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            List<AppointmentDTO> appointments = appointmentRepository
-                    .filterByDoctorNameAndPatientId(doctorName, patientId)
-                    .stream()
-                    .map(AppointmentDTO::from)
-                    .collect(Collectors.toList());
-            response.put("appointments", appointments);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("message", "Internal server error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+    public List<AppointmentDTO> filterByDoctor(String doctorName, long patientId) {
+        return appointmentRepository
+                .filterByDoctorNameAndPatientId(doctorName, patientId)
+                .stream()
+                .map(AppointmentDTO::from)
+                .collect(Collectors.toList());
     }
 
-    public ResponseEntity<Map<String, Object>> filterByDoctorAndCondition(String doctorName, long patientId, String condition) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            int status;
-            if ("past".equalsIgnoreCase(condition)) {
-                status = 1;
-            } else if ("future".equalsIgnoreCase(condition)) {
-                status = 0;
-            } else {
-                response.put("message", "Invalid condition: use 'past' or 'future'");
-                return ResponseEntity.badRequest().body(response);
-            }
-            List<AppointmentDTO> appointments = appointmentRepository
-                    .filterByDoctorNameAndPatientIdAndStatus(doctorName, patientId, status)
-                    .stream()
-                    .map(AppointmentDTO::from)
-                    .collect(Collectors.toList());
-            response.put("appointments", appointments);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("message", "Internal server error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+    public List<AppointmentDTO> filterByDoctorAndCondition(String doctorName, long patientId, String condition) {
+        int status = parseConditionStatus(condition);
+        return appointmentRepository
+                .filterByDoctorNameAndPatientIdAndStatus(doctorName, patientId, status)
+                .stream()
+                .map(AppointmentDTO::from)
+                .collect(Collectors.toList());
+    }
+
+    private int parseConditionStatus(String condition) {
+        if ("past".equalsIgnoreCase(condition)) return 1;
+        if ("future".equalsIgnoreCase(condition)) return 0;
+        throw new IllegalArgumentException("Invalid condition: use 'past' or 'future'");
     }
 
 

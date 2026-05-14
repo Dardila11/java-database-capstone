@@ -1,5 +1,6 @@
 package com.project.back_end.services;
 
+import com.project.back_end.DTO.AppointmentDTO;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
@@ -117,14 +118,16 @@ public class Service {
         boolean hasCondition = condition != null && !condition.isEmpty();
         boolean hasDoctorName = doctorName != null && !doctorName.isEmpty();
 
+        List<AppointmentDTO> appointments;
         if (hasCondition && hasDoctorName) {
-            return patientService.filterByDoctorAndCondition(doctorName, patientId, condition);
+            appointments = patientService.filterByDoctorAndCondition(doctorName, patientId, condition);
         } else if (hasCondition) {
-            return patientService.filterByCondition(patientId, condition);
+            appointments = patientService.filterByCondition(patientId, condition);
         } else if (hasDoctorName) {
-            return patientService.filterByDoctor(doctorName, patientId);
+            appointments = patientService.filterByDoctor(doctorName, patientId);
         } else {
-            return ResponseEntity.ok(Map.of("appointments", patientService.getPatientAppointments(patientId)));
+            appointments = patientService.getPatientAppointments(patientId);
         }
+        return ResponseEntity.ok(Map.of("appointments", appointments));
     }
 }
