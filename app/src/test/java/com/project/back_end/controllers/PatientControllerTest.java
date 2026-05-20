@@ -2,6 +2,7 @@ package com.project.back_end.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.back_end.DTO.AuthDTO;
+import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.models.Patient;
@@ -146,7 +147,7 @@ public class PatientControllerTest {
         @DisplayName("returns 200 when patient is created successfully")
         void create_validPatient_returns200() throws Exception {
             when(service.validatePatient("john@gmail.com", "1234567890")).thenReturn(true);
-            when(patientService.createPatient(any(Patient.class))).thenReturn(1);
+            when(patientService.createPatient(any(Patient.class))).thenReturn(ServiceResult.SUCCESS);
 
             mockMvc.perform(post("/patient/create")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +172,7 @@ public class PatientControllerTest {
         @DisplayName("returns 500 when service fails to persist")
         void create_persistenceFails_returns500() throws Exception {
             when(service.validatePatient("john@gmail.com", "1234567890")).thenReturn(true);
-            when(patientService.createPatient(any(Patient.class))).thenReturn(0);
+            when(patientService.createPatient(any(Patient.class))).thenReturn(ServiceResult.CONFLICT);
 
             mockMvc.perform(post("/patient/create")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -270,7 +271,7 @@ public class PatientControllerTest {
         void filter_validToken_returns200() throws Exception {
             when(service.extractToken("Bearer mocked.jwt.token")).thenReturn("mocked.jwt.token");
             when(service.filterPatient("mocked.jwt.token", "upcoming", "John"))
-                    .thenReturn(ResponseEntity.ok(Map.of("appointments", List.of())));
+                    .thenReturn(List.of());
 
             mockMvc.perform(get("/patient/filter/upcoming/John")
                             .header("Authorization", "Bearer mocked.jwt.token"))
