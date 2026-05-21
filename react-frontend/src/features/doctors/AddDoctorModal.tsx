@@ -40,7 +40,7 @@ export function AddDoctorModal({ onClose, onAdd }: Props) {
       const availableTimes = Object.entries(form.availability)
         .filter(([, on]) => on)
         .map(([label]) => slotToTimeRange(label));
-      await onAdd({ name: form.name, specialty: form.specialty, email: form.email, phone: form.phone, password: form.password, availableTimes });
+      await onAdd({ name: form.name, specialty: form.specialty, email: form.email, phone: form.phone, availableTimes });
       setSuccess(true);
       setTimeout(onClose, 1400);
     } catch (err) {
