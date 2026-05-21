@@ -44,7 +44,6 @@ export interface DoctorCreateRequest {
   specialty: string;
   email: string;
   phone: string;
-  password: string;
   availableTimes: string[];
 }
 

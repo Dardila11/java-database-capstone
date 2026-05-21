@@ -1,9 +1,17 @@
-version: "3.8"
-
 services:
-  app:
+  frontend:
     build:
-      context: .
+      context: ./react-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./app
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     depends_on:
@@ -11,11 +19,6 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydb
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
-      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/my_mongo_db
 
   mysql:
     image: mysql:8.0
@@ -23,13 +26,15 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     healthcheck:
-      test: ["CMD", "mysql", "-uroot", "-proot", "-e", "SELECT 1"]
+      test: ["CMD", "mysql", "-u${SPRING_DATASOURCE_USERNAME}", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - mysql_data:/var/lib/mysql
 
   mongodb:
     image: mongo:6.0
@@ -41,3 +46,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mysql_data:
+  mongodb_data:

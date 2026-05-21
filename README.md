@@ -21,9 +21,8 @@ A full-stack web application for managing clinic operations, exposing a Spring B
 
 ## Prerequisites
 
-- Java 17+
-- MySQL with a database named `cms`
-- MongoDB (default port 27017)
+- Docker and Docker Compose (Recommended)
+- OR Java 17+, MySQL (database `cms`), and MongoDB (port 27017)
 
 ---
 
@@ -41,9 +40,29 @@ spring.data.mongodb.uri=mongodb://root:<mongodb_password>@<mongodb_host>:27017/p
 jwt.secret=${JWT_SECRET}
 ```
 
+Environment variables for Docker can be configured in the `.env` file at the root of the project.
+
 ---
 
 ## Running the Application
+
+### Using Docker (Recommended)
+
+You can run the entire application stack (Frontend, Backend, MySQL, MongoDB) using Docker Compose:
+
+```bash
+# Start all services in the background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+Once started, the frontend will be available at `http://localhost` and the backend API at `http://localhost:8080`.
+
+### Manual Setup (Without Docker)
 
 ```bash
 cd app
@@ -148,8 +167,12 @@ Login endpoints return a JWT token valid for 7 days. All protected endpoints req
 java-database-capstone/
 ├── CLAUDE.md
 ├── README.md
+├── docker-compose.yml
+├── .env
 ├── schema-architecture.md
+├── react-frontend/       # React frontend application
 └── app/
+    ├── Dockerfile        # Backend Docker configuration
     ├── pom.xml
     └── src/
         ├── main/
