@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.project.back_end.appointment.Appointment;
@@ -14,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DoctorService {
+
+  private static final Logger log = LoggerFactory.getLogger(DoctorService.class);
+
   private final DoctorRepository doctorRepository;
   private final AppointmentRepository appointmentRepository;
   private final PasswordEncoder passwordEncoder;
@@ -95,7 +100,7 @@ public class DoctorService {
       doctorRepository.deleteById(doctorId);
       return ServiceResult.SUCCESS;
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      log.error("Failed to delete doctor id {}", doctorId, e);
       return ServiceResult.CONFLICT;
     }
   }

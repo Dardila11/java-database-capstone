@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,8 @@ import com.project.back_end.shared.TokenService;
 
 @Service
 public class AppointmentService {
+
+  private static final Logger log = LoggerFactory.getLogger(AppointmentService.class);
 
   private final AppointmentRepository appointmentRepository;
   private final PatientRepository patientRepository;
@@ -103,7 +107,7 @@ public class AppointmentService {
       appointmentRepository.deleteById(appointmentId);
       return ServiceResult.SUCCESS;
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      log.error("Failed to cancel appointment id {}", appointmentId, e);
       return ServiceResult.CONFLICT;
     }
   }
