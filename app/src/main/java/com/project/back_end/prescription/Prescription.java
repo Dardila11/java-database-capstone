@@ -1,4 +1,4 @@
-package com.project.back_end.models;
+package com.project.back_end.prescription;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+package com.project.back_end.doctor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
+import com.project.back_end.appointment.Appointment;
+import com.project.back_end.appointment.AppointmentRepository;
 import com.project.back_end.enums.ServiceResult;
-import com.project.back_end.models.Appointment;
-import com.project.back_end.models.Doctor;
-import com.project.back_end.repo.AppointmentRepository;
-import com.project.back_end.repo.DoctorRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.transaction.annotation.Transactional;

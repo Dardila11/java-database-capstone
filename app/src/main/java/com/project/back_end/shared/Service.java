@@ -1,12 +1,14 @@
-package com.project.back_end.services;
+package com.project.back_end.shared;
 
-import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.appointment.AppointmentDTO;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.NotFoundException;
-import com.project.back_end.models.Doctor;
-import com.project.back_end.models.Patient;
-import com.project.back_end.repo.DoctorRepository;
-import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.doctor.Doctor;
+import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.doctor.DoctorService;
+import com.project.back_end.patient.Patient;
+import com.project.back_end.patient.PatientRepository;
+import com.project.back_end.patient.PatientService;
 import java.time.LocalDateTime;
 import java.util.List;
 

@@ -1,12 +1,14 @@
 package com.project.back_end.services;
 
-import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.appointment.Appointment;
+import com.project.back_end.appointment.AppointmentDTO;
+import com.project.back_end.appointment.AppointmentRepository;
 import com.project.back_end.enums.ServiceResult;
-import com.project.back_end.models.Appointment;
-import com.project.back_end.models.Doctor;
-import com.project.back_end.models.Patient;
-import com.project.back_end.repo.AppointmentRepository;
-import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.doctor.Doctor;
+import com.project.back_end.patient.Patient;
+import com.project.back_end.patient.PatientRepository;
+import com.project.back_end.patient.PatientService;
+import com.project.back_end.shared.TokenService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

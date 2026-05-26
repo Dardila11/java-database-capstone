@@ -1,4 +1,4 @@
-package com.project.back_end.models;
+package com.project.back_end.doctor;
 
 import java.util.List;
 

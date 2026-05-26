@@ -1,4 +1,4 @@
-package com.project.back_end.models;
+package com.project.back_end.admin;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,8 +1,8 @@
 
-package com.project.back_end.controllers;
+package com.project.back_end.admin;
 
-import com.project.back_end.DTO.AuthDTO;
-import com.project.back_end.services.ValidationService;
+import com.project.back_end.shared.AuthDTO;
+import com.project.back_end.shared.ValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

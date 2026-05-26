@@ -1,4 +1,4 @@
-package com.project.back_end.models;
+package com.project.back_end.appointment;
 
 
 import java.time.LocalDate;
@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
+import com.project.back_end.doctor.Doctor;
+import com.project.back_end.patient.Patient;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 

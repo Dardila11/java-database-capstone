@@ -1,12 +1,9 @@
-package com.project.back_end.controllers;
+package com.project.back_end.doctor;
 
-
-import com.project.back_end.DTO.AuthDTO;
+import com.project.back_end.shared.AuthDTO;
 import com.project.back_end.enums.ServiceResult;
-import com.project.back_end.models.Doctor;
-import com.project.back_end.services.DoctorService;
-import com.project.back_end.services.Service;
-import com.project.back_end.services.ValidationService;
+import com.project.back_end.shared.Service;
+import com.project.back_end.shared.ValidationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

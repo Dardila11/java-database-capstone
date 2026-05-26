@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+package com.project.back_end.patient;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,10 +9,9 @@ import com.project.back_end.exceptions.NotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.back_end.DTO.AppointmentDTO;
-import com.project.back_end.models.Patient;
-import com.project.back_end.repo.AppointmentRepository;
-import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.appointment.AppointmentDTO;
+import com.project.back_end.appointment.AppointmentRepository;
+import com.project.back_end.shared.TokenService;
 
 @org.springframework.stereotype.Service
 public class PatientService {

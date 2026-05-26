@@ -1,14 +1,15 @@
 package com.project.back_end.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.back_end.DTO.AuthDTO;
+import com.project.back_end.shared.AuthDTO;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.exceptions.InvalidTokenException;
-import com.project.back_end.models.Patient;
-import com.project.back_end.services.PatientService;
-import com.project.back_end.services.Service;
-import com.project.back_end.services.ValidationService;
+import com.project.back_end.patient.Patient;
+import com.project.back_end.patient.PatientController;
+import com.project.back_end.patient.PatientService;
+import com.project.back_end.shared.Service;
+import com.project.back_end.shared.ValidationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

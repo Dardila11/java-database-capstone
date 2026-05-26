@@ -1,6 +1,5 @@
-package com.project.back_end.repo;
+package com.project.back_end.admin;
 
-import com.project.back_end.models.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

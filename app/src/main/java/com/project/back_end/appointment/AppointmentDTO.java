@@ -1,10 +1,8 @@
-package com.project.back_end.DTO;
+package com.project.back_end.appointment;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
-import com.project.back_end.models.Appointment;
 
 /**
  * Flattened appointment view for API responses: avoids entity graphs and excludes

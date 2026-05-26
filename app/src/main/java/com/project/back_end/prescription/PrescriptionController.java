@@ -1,11 +1,9 @@
-package com.project.back_end.controllers;
+package com.project.back_end.prescription;
 
 import com.project.back_end.enums.ServiceResult;
-import com.project.back_end.models.Prescription;
-import com.project.back_end.services.AppointmentService;
-import com.project.back_end.services.PrescriptionService;
-import com.project.back_end.services.Service;
-import com.project.back_end.services.ValidationService;
+import com.project.back_end.appointment.AppointmentService;
+import com.project.back_end.shared.Service;
+import com.project.back_end.shared.ValidationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

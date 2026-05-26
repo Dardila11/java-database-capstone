@@ -1,4 +1,4 @@
-package com.project.back_end.models;
+package com.project.back_end.patient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

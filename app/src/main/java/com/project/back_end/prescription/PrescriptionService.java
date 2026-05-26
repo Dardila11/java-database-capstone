@@ -1,8 +1,6 @@
-package com.project.back_end.services;
+package com.project.back_end.prescription;
 
 import com.project.back_end.enums.ServiceResult;
-import com.project.back_end.models.Prescription;
-import com.project.back_end.repo.PrescriptionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

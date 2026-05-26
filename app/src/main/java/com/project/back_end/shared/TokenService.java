@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+package com.project.back_end.shared;
 
 import java.util.Date;
 
@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.project.back_end.repo.AdminRepository;
-import com.project.back_end.repo.DoctorRepository;
-import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.admin.AdminRepository;
+import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.patient.PatientRepository;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

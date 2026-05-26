@@ -1,4 +1,4 @@
-package com.project.back_end.DTO;
+package com.project.back_end.shared;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

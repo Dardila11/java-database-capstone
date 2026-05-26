@@ -1,11 +1,12 @@
 package com.project.back_end.services;
 
-import com.project.back_end.models.Admin;
-import com.project.back_end.models.Doctor;
-import com.project.back_end.models.Patient;
-import com.project.back_end.repo.AdminRepository;
-import com.project.back_end.repo.DoctorRepository;
-import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.admin.Admin;
+import com.project.back_end.admin.AdminRepository;
+import com.project.back_end.doctor.Doctor;
+import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.patient.Patient;
+import com.project.back_end.patient.PatientRepository;
+import com.project.back_end.shared.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

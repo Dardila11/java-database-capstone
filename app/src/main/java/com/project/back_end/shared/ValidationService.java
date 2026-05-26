@@ -1,13 +1,13 @@
-package com.project.back_end.services;
+package com.project.back_end.shared;
 
 import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.exceptions.InvalidTokenException;
-import com.project.back_end.models.Admin;
-import com.project.back_end.models.Doctor;
-import com.project.back_end.models.Patient;
-import com.project.back_end.repo.AdminRepository;
-import com.project.back_end.repo.DoctorRepository;
-import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.admin.Admin;
+import com.project.back_end.admin.AdminRepository;
+import com.project.back_end.doctor.Doctor;
+import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.patient.Patient;
+import com.project.back_end.patient.PatientRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
