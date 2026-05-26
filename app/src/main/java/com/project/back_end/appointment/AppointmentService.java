@@ -125,7 +125,7 @@ public class AppointmentService {
     LocalDateTime end = localDate.atTime(LocalTime.MAX);
 
     List<Appointment> appointments;
-    if (patientName == null) {
+    if (patientName == null || "null".equals(patientName)) {
       appointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end);
     } else {
       appointments = appointmentRepository

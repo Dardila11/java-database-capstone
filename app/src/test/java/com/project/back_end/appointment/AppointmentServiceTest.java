@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+package com.project.back_end.appointment;
 
 import com.project.back_end.appointment.Appointment;
 import com.project.back_end.appointment.AppointmentDTO;

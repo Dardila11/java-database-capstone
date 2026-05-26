@@ -1,4 +1,4 @@
-package com.project.back_end.controllers;
+package com.project.back_end.doctor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.back_end.shared.AuthDTO;

@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+package com.project.back_end.shared;
 
 import com.project.back_end.admin.Admin;
 import com.project.back_end.admin.AdminRepository;
