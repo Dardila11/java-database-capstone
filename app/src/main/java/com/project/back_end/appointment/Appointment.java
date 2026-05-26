@@ -1,6 +1,5 @@
 package com.project.back_end.appointment;
 
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -18,8 +17,7 @@ import com.project.back_end.patient.Patient;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 
-@Entity
-(name = "appointment")
+@Entity(name = "appointment")
 public class Appointment {
 
   @Id

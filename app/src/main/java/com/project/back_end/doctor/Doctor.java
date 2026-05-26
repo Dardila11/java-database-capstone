@@ -14,8 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-@Entity
-(name = "doctor")
+@Entity(name = "doctor")
 public class Doctor {
 
   @Id

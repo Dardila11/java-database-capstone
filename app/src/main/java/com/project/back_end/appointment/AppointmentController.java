@@ -25,13 +25,6 @@ public class AppointmentController {
         this.validationService = validationService;
     }
 
-// 3. Define the `getAppointments` Method:
-//    - Handles HTTP GET requests to fetch appointments based on date and patient name.
-//    - Takes the appointment date, patient name, and token as path variables.
-//    - First validates the token for role `"doctor"` using the `Service`.
-//    - If the token is valid, returns appointments for the given patient on the specified date.
-//    - If the token is invalid or expired, responds with the appropriate message and status code.
-
     @GetMapping("/{date}/{patientName}/")
     public ResponseEntity<Map<String, Object>> getAppointments(
             @PathVariable String date,
@@ -46,12 +39,6 @@ public class AppointmentController {
 
 
 
-// 4. Define the `bookAppointment` Method:
-//    - Handles HTTP POST requests to create a new appointment.
-//    - Accepts a validated `Appointment` object in the request body and a token as a path variable.
-//    - Validates the token for the `"patient"` role.
-//    - Uses service logic to validate the appointment data (e.g., check for doctor availability and time conflicts).
-//    - Returns success if booked, or appropriate error messages if the doctor ID is invalid or the slot is already taken.
     @PostMapping("/")
     public ResponseEntity<Map<String, String>> bookAppointment(
             @RequestBody Appointment appointment,
@@ -79,13 +66,6 @@ public class AppointmentController {
         }
     }
 
-
-// 5. Define the `updateAppointment` Method:
-//    - Handles HTTP PUT requests to modify an existing appointment.
-//    - Accepts a validated `Appointment` object and a token as input.
-//    - Validates the token for `"patient"` role.
-//    - Delegates the update logic to the `AppointmentService`.
-//    - Returns an appropriate success or failure response based on the update result.
     @PutMapping("/")
     public ResponseEntity<Map<String, String>> updateAppointment(
             @RequestBody Appointment appointment,
@@ -108,12 +88,6 @@ public class AppointmentController {
 
     }
 
-
-// 6. Define the `cancelAppointment` Method:
-//    - Handles HTTP DELETE requests to cancel a specific appointment.
-//    - Accepts the appointment ID and a token as path variables.
-//    - Validates the token for `"patient"` role to ensure the user is authorized to cancel the appointment.
-//    - Calls `AppointmentService` to handle the cancellation process and returns the result.
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> cancelAppointment(
             @PathVariable long id,

@@ -37,11 +37,6 @@ public class DoctorController {
 
     }
 
-// 3. Define the `getDoctorAvailability` Method:
-//    - Handles HTTP GET requests to check a specific doctor’s availability on a given date.
-//    - Requires `user` type, `doctorId`, `date`, and `token` as path variables.
-//    - First validates the token against the user type.
-//    - If the token is invalid, returns an error response; otherwise, returns the availability status for the doctor.
     @GetMapping("/availability/{user}/{doctorId}/{date}")
     public ResponseEntity<Map<String, Object>> getDoctorAvailability(
             @PathVariable String user,
@@ -54,21 +49,11 @@ public class DoctorController {
         return ResponseEntity.ok(Map.of("availability", doctorService.getDoctorAvailability(doctorId, date)));
     }
 
-
-
-
-// 5. Define the `saveDoctor` Method:
-//    - Handles HTTP POST requests to register a new doctor.
-//    - Accepts a validated `Doctor` object in the request body and a token for authorization.
-//    - Validates the token for the `"admin"` role before proceeding.
-//    - If the doctor already exists, returns a conflict response; otherwise, adds the doctor and returns a success message.
-
     @PostMapping("/")
     public ResponseEntity<Map<String, String>> saveDoctor(
             @RequestBody Doctor doctor,
             @RequestHeader("Authorization") String authHeader
     ){
-        // validate token
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, "admin");
         ServiceResult saveResult = doctorService.saveDoctor(doctor);
@@ -81,37 +66,23 @@ public class DoctorController {
         };
     }
 
-
-
-// 7. Define the `updateDoctor` Method:
-//    - Handles HTTP PUT requests to update an existing doctor's information.
-//    - Accepts a validated `Doctor` object and a token for authorization.
-//    - Token must belong to an `"admin"`.
-//    - If the doctor exists, updates the record and returns success; otherwise, returns not found or error messages.
-
-        @PutMapping("/")
-        public ResponseEntity<Map<String, String>> updateDoctor(
-                @RequestBody Doctor doctor,
-                @RequestHeader("Authorization") String authHeader
-        ){
-            String token = service.extractToken(authHeader);
-            validationService.validateToken(token, "admin");
-            ServiceResult updateResult = doctorService.updateDoctor(doctor);
-            return switch (updateResult) {
-                case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error",
-                        "doctor does not exist"));
-                case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor updated"));
-                case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to update"));
-                default ->
-                        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "failed to update"));
+    @PutMapping("/")
+    public ResponseEntity<Map<String, String>> updateDoctor(
+            @RequestBody Doctor doctor,
+            @RequestHeader("Authorization") String authHeader
+    ){
+        String token = service.extractToken(authHeader);
+        validationService.validateToken(token, "admin");
+        ServiceResult updateResult = doctorService.updateDoctor(doctor);
+        return switch (updateResult) {
+            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error",
+                    "doctor does not exist"));
+            case SUCCESS -> ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "doctor updated"));
+            case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "failed to update"));
+            default ->
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "failed to update"));
             };
         }
-
-
-// 8. Define the `deleteDoctor` Method:
-//    - Handles HTTP DELETE requests to remove a doctor by ID.
-//    - Requires both doctor ID and an admin token as path variables.
-//    - If the doctor exists, deletes the record and returns a success message; otherwise, responds with a not found or error message.
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteDoctor(
@@ -129,10 +100,6 @@ public class DoctorController {
         };
     }
 
-// 9. Define the `filter` Method:
-//    - Handles HTTP GET requests to filter doctors based on name, time, and specialty.
-//    - Accepts `name`, `time`, and `speciality` as path variables.
-//    - Calls the shared `Service` to perform filtering logic and returns matching doctors in the response.
     @GetMapping("/filter/{name}/{time}/{speciality}")
     public ResponseEntity<Map<String, Object>> filter(
             @PathVariable String name,

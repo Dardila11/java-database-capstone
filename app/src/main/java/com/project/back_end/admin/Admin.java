@@ -9,8 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 
-@Entity
-(name = "admin")
+@Entity(name = "admin")
 public class Admin {
 
   
