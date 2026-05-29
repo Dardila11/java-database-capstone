@@ -1,5 +1,5 @@
 
-package com.project.back_end.admin;
+package com.project.back_end.admin.internal;
 
 import com.project.back_end.shared.AuthDTO;
 import com.project.back_end.shared.ValidationService;
@@ -22,9 +22,11 @@ import java.util.Map;
 @Tag(name = "Admin Controller for Authentication")
 public class AdminController {
     private final ValidationService validationService;
+    private final AuthService authService;
 
-    public AdminController(ValidationService validationService) {
+    public AdminController(ValidationService validationService, AuthService authService) {
         this.validationService = validationService;
+        this.authService = authService;
     }
 
     @PostMapping("/login")
@@ -60,7 +62,7 @@ public class AdminController {
 
     )
     public ResponseEntity<Map<String, String>> adminLogin(@Valid @RequestBody AuthDTO.AdminLoginRequest adminLoginRequest) {
-        String token = validationService.validateAdminLogin(adminLoginRequest.username(), adminLoginRequest.password());
+        String token = authService.validateAdminLogin(adminLoginRequest.username(), adminLoginRequest.password());
         return ResponseEntity.ok(Map.of("token", token));
     }
 }
