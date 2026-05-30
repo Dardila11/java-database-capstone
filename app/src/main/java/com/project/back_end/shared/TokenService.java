@@ -1,6 +1,9 @@
 package com.project.back_end.shared;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
@@ -8,10 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import com.project.back_end.admin.AdminRepository;
-import com.project.back_end.doctor.DoctorRepository;
-import com.project.back_end.patient.PatientRepository;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -22,28 +21,23 @@ public class TokenService {
 
     private static final Logger log = LoggerFactory.getLogger(TokenService.class);
 
-    private final AdminRepository adminRepository;
-    private final DoctorRepository doctorRepository;
-    private final PatientRepository patientRepository;
+    private final Map<String, RoleValidator> validators;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    public TokenService(AdminRepository adminRepository,
-                        DoctorRepository doctorRepository,
-                        PatientRepository patientRepository) {
-        this.adminRepository = adminRepository;
-        this.doctorRepository = doctorRepository;
-        this.patientRepository = patientRepository;
+    public TokenService(List<RoleValidator> validators) {
+        this.validators = validators.stream()
+                .collect(Collectors.toMap(RoleValidator::role, v -> v));
     }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String subject) {
         return Jwts.builder()
-                .subject(email)
+                .subject(subject)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000))
                 .signWith(getSigningKey())
@@ -62,12 +56,8 @@ public class TokenService {
     public boolean validateToken(String token, String role) {
         try {
             String subject = extractEmail(token);
-            return switch (role) {
-                case "admin" -> adminRepository.findByUsername(subject) != null;
-                case "doctor" -> doctorRepository.findByEmail(subject) != null;
-                case "patient" -> patientRepository.findByEmail(subject).isPresent();
-                default -> false;
-            };
+            RoleValidator validator = validators.get(role);
+            return validator != null && validator.isValidSubject(subject);
         } catch (JwtException e) {
             return false;
         } catch (Exception e) {

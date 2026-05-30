@@ -22,12 +22,11 @@ import java.util.Map;
 @Tag(name = "Admin Controller for Authentication")
 public class AdminController {
     private final ValidationService validationService;
-    private final AuthService authService;
 
-    public AdminController(ValidationService validationService, AuthService authService) {
+    public AdminController(ValidationService validationService) {
         this.validationService = validationService;
-        this.authService = authService;
     }
+
 
     @PostMapping("/login")
     @Operation(
@@ -62,7 +61,7 @@ public class AdminController {
 
     )
     public ResponseEntity<Map<String, String>> adminLogin(@Valid @RequestBody AuthDTO.AdminLoginRequest adminLoginRequest) {
-        String token = authService.validateAdminLogin(adminLoginRequest.username(), adminLoginRequest.password());
+        String token = validationService.validateAdminLogin(adminLoginRequest.username(), adminLoginRequest.password());
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

@@ -1,15 +1,12 @@
 package com.project.back_end.admin.internal;
 
 import com.project.back_end.admin.Admin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.project.back_end.shared.AdminUserLookup;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AdminService {
-
-    private static final Logger log = LoggerFactory.getLogger(AdminService.class);
+public class AdminService implements AdminUserLookup {
 
     private final AdminRepository adminRepository;
     private final ApplicationEventPublisher events;
@@ -19,8 +16,18 @@ public class AdminService {
         this.events = events;
     }
 
-    public Admin findByUsername(String username){
-        return adminRepository.findByUsername(username);
+    @Override
+    public String getPasswordByUsername(String username) {
+        Admin admin = adminRepository.findByUsername(username);
+        return admin != null ? admin.getPassword() : null;
     }
 
+    @Override
+    public void updatePassword(String username, String encodedPassword) {
+        Admin admin = adminRepository.findByUsername(username);
+        if (admin != null) {
+            admin.setPassword(encodedPassword);
+            adminRepository.save(admin);
+        }
+    }
 }

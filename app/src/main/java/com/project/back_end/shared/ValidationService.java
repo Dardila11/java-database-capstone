@@ -2,8 +2,6 @@ package com.project.back_end.shared;
 
 import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.exceptions.InvalidTokenException;
-import com.project.back_end.admin.Admin;
-import com.project.back_end.admin.AdminRepository;
 import com.project.back_end.doctor.Doctor;
 import com.project.back_end.doctor.DoctorRepository;
 import com.project.back_end.patient.Patient;
@@ -23,16 +21,16 @@ public class ValidationService {
 
     private final TokenService tokenService;
     private final PatientRepository patientRepository;
-    private final AdminRepository adminRepository;
+    private final AdminUserLookup adminLookup;
     private final DoctorRepository doctorRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ValidationService(TokenService tokenService, PatientRepository patientRepository,
-                             AdminRepository adminRepository, DoctorRepository doctorRepository,
+                             AdminUserLookup adminLookup, DoctorRepository doctorRepository,
                              PasswordEncoder passwordEncoder) {
         this.tokenService = tokenService;
         this.patientRepository = patientRepository;
-        this.adminRepository = adminRepository;
+        this.adminLookup = adminLookup;
         this.doctorRepository = doctorRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -81,8 +79,6 @@ public class ValidationService {
 
     /**
      * Validates admin credentials and returns a JWT on success.
-     * If the stored password is plain-text (legacy record), it is migrated to BCrypt
-     * on the first successful login.
      *
      * @param username the admin's username
      * @param password the raw password supplied by the admin
@@ -90,20 +86,13 @@ public class ValidationService {
      * @throws com.project.back_end.exceptions.InvalidCredentialsException if no admin with the given username exists or the password does not match
      */
     public String validateAdminLogin(String username, String password) {
-        Admin admin = adminRepository.findByUsername(username);
-        if (admin == null) throw new InvalidCredentialsException("Invalid username or password");
+        String stored = adminLookup.getPasswordByUsername(username);
+        if (stored == null) throw new InvalidCredentialsException("Invalid username or password");
 
-        String stored = admin.getPassword();
-
-        if (passwordEncoder.matches(password, stored)) {
-            // already BCrypt-hashed
-        } else if (password.equals(stored)) {
-            admin.setPassword(passwordEncoder.encode(password));
-            adminRepository.save(admin);
-        } else {
+        if (!passwordEncoder.matches(password, stored)) {
             throw new InvalidCredentialsException("Invalid username or password");
         }
-        return tokenService.generateToken(admin.getUsername());
+        return tokenService.generateToken(username);
     }
 
     /**
