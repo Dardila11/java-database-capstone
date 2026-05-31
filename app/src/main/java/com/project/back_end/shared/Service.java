@@ -8,8 +8,7 @@ import com.project.back_end.doctor.Doctor;
 import com.project.back_end.doctor.DoctorRepository;
 import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.internal.PatientRepository;
-import com.project.back_end.patient.internal.PatientService;
+import com.project.back_end.patient.PatientLookup;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,18 +17,17 @@ public class Service {
 
     private final TokenService tokenService;
     private final DoctorRepository doctorRepository;
-    private final PatientRepository patientRepository;
     private final DoctorService doctorService;
-    private final PatientService patientService;
+    private final PatientLookup patientLookup;
     private final AppointmentService appointmentService;
 
-    public Service(TokenService tokenService, DoctorRepository doctorRepository, PatientRepository patientRepository,
-                   DoctorService doctorService, PatientService patientService, AppointmentService appointmentService) {
+    public Service(TokenService tokenService, DoctorRepository doctorRepository,
+                   DoctorService doctorService, PatientLookup patientLookup,
+                   AppointmentService appointmentService) {
         this.tokenService = tokenService;
         this.doctorRepository = doctorRepository;
-        this.patientRepository = patientRepository;
         this.doctorService = doctorService;
-        this.patientService = patientService;
+        this.patientLookup = patientLookup;
         this.appointmentService = appointmentService;
     }
 
@@ -114,7 +112,7 @@ public class Service {
      * @return {@code true} if the combination is unique, {@code false} if a duplicate is found
      */
     public boolean validatePatient(String email, String phone) {
-        return patientRepository.findByEmailOrPhone(email, phone) == null;
+        return !patientLookup.existsByEmailOrPhone(email, phone);
     }
 
     /**
@@ -129,7 +127,7 @@ public class Service {
      */
     public List<AppointmentDTO> filterPatient(String token, String condition, String doctorName) {
         String email = tokenService.extractEmail(token);
-        Patient patient = patientRepository.findByEmail(email)
+        Patient patient = patientLookup.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Patient not found"));
         long patientId = patient.getId();
 

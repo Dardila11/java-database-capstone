@@ -4,4 +4,5 @@ import java.util.Optional;
 
 public interface PatientLookup {
     Optional<Patient> findByEmail(String email);
+    boolean existsByEmailOrPhone(String email, String phone);
 }

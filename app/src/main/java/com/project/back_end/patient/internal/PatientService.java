@@ -25,8 +25,14 @@ public class PatientService implements PatientLookup {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
     public Optional<Patient> findByEmail(String email) {
         return patientRepository.findByEmail(email);
+    }
+
+    @Override
+    public boolean existsByEmailOrPhone(String email, String phone) {
+        return patientRepository.findByEmailOrPhone(email, phone) != null;
     }
 
     public ServiceResult createPatient(Patient patient) {
