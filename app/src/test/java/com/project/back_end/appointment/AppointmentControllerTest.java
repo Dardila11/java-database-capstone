@@ -2,9 +2,9 @@ package com.project.back_end.appointment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.back_end.appointment.Appointment;
-import com.project.back_end.appointment.AppointmentController;
 import com.project.back_end.appointment.AppointmentDTO;
 import com.project.back_end.appointment.AppointmentService;
+import com.project.back_end.appointment.internal.AppointmentController;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.doctor.Doctor;

@@ -6,44 +6,45 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.project.back_end.doctor.internal.DoctorRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import com.project.back_end.appointment.Appointment;
-import com.project.back_end.appointment.AppointmentRepository;
 import com.project.back_end.enums.ServiceResult;
+import com.project.back_end.shared.event.DoctorDeletedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class DoctorService {
 
   private static final Logger log = LoggerFactory.getLogger(DoctorService.class);
 
   private final DoctorRepository doctorRepository;
-  private final AppointmentRepository appointmentRepository;
+  private final ApplicationEventPublisher eventPublisher;
   private final PasswordEncoder passwordEncoder;
 
-  public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository,
+  public DoctorService(DoctorRepository doctorRepository, ApplicationEventPublisher eventPublisher,
                        PasswordEncoder passwordEncoder) {
     this.doctorRepository = doctorRepository;
-    this.appointmentRepository = appointmentRepository;
+    this.eventPublisher = eventPublisher;
     this.passwordEncoder = passwordEncoder;
   }
 
-  @Transactional
-  public List<String> getDoctorAvailability(long doctorId, LocalDateTime date) {
-    LocalDateTime start = date.toLocalDate().atStartOfDay();
-    LocalDateTime end = date.toLocalDate().atTime(23, 59, 59);
+  public Doctor findByEmail(String email) {
+    return doctorRepository.findByEmail(email);
+  }
 
-    List<Appointment> appointments = appointmentRepository
-        .findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end);
+  public boolean existsById(long doctorId) {
+    return doctorRepository.existsById(doctorId);
+  }
 
-    List<String> bookedSlots = appointments.stream()
-        .map(a -> String.format("%02d:%02d-%02d:%02d",
-            a.getAppointmentTime().getHour(),
-            a.getAppointmentTime().getMinute(),
-            a.getAppointmentTime().plusHours(1).getHour(),
-            a.getAppointmentTime().plusHours(1).getMinute()))
+  public List<String> getDoctorAvailability(long doctorId, List<LocalDateTime> bookedTimes) {
+    List<String> bookedSlots = bookedTimes.stream()
+        .map(t -> String.format("%02d:%02d-%02d:%02d",
+            t.getHour(), t.getMinute(),
+            t.plusHours(1).getHour(), t.plusHours(1).getMinute()))
         .toList();
 
     Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
@@ -91,12 +92,13 @@ public class DoctorService {
     return doctors;
   }
 
+  @Transactional
   public ServiceResult deleteDoctor(long doctorId) {
     try {
       if (!doctorRepository.existsById(doctorId)) {
         return ServiceResult.NOT_FOUND;
       }
-      appointmentRepository.deleteAllByDoctorId(doctorId);
+      eventPublisher.publishEvent(new DoctorDeletedEvent(doctorId));
       doctorRepository.deleteById(doctorId);
       return ServiceResult.SUCCESS;
     } catch (Exception e) {

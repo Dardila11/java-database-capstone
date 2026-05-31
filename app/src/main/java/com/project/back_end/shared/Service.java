@@ -5,7 +5,6 @@ import com.project.back_end.appointment.AppointmentService;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.NotFoundException;
 import com.project.back_end.doctor.Doctor;
-import com.project.back_end.doctor.DoctorRepository;
 import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.patient.Patient;
 import com.project.back_end.patient.PatientLookup;
@@ -16,16 +15,13 @@ import java.util.List;
 public class Service {
 
     private final TokenService tokenService;
-    private final DoctorRepository doctorRepository;
     private final DoctorService doctorService;
     private final PatientLookup patientLookup;
     private final AppointmentService appointmentService;
 
-    public Service(TokenService tokenService, DoctorRepository doctorRepository,
-                   DoctorService doctorService, PatientLookup patientLookup,
-                   AppointmentService appointmentService) {
+    public Service(TokenService tokenService, DoctorService doctorService,
+                   PatientLookup patientLookup, AppointmentService appointmentService) {
         this.tokenService = tokenService;
-        this.doctorRepository = doctorRepository;
         this.doctorService = doctorService;
         this.patientLookup = patientLookup;
         this.appointmentService = appointmentService;
@@ -93,14 +89,19 @@ public class Service {
      *         {@link ServiceResult#NOT_FOUND} if the doctor does not exist
      */
     public ServiceResult validateAppointment(long doctorId, LocalDateTime appointmentTime) {
-        if (!doctorRepository.existsById(doctorId)) {
+        if (!doctorService.existsById(doctorId)) {
             return ServiceResult.NOT_FOUND;
         }
-        List<String> availableSlots = doctorService.getDoctorAvailability(doctorId, appointmentTime);
+        List<String> availableSlots = getDoctorAvailability(doctorId, appointmentTime);
         String requestedStart = String.format("%02d:%02d", appointmentTime.getHour(), appointmentTime.getMinute());
         boolean matched = availableSlots.stream()
                 .anyMatch(slot -> slot.startsWith(requestedStart));
         return matched ? ServiceResult.SUCCESS : ServiceResult.CONFLICT;
+    }
+
+    public List<String> getDoctorAvailability(long doctorId, LocalDateTime date) {
+        List<LocalDateTime> bookedTimes = appointmentService.getBookedTimesForDoctor(doctorId, date);
+        return doctorService.getDoctorAvailability(doctorId, bookedTimes);
     }
 
     /**

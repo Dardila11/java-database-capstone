@@ -1,5 +1,6 @@
-package com.project.back_end.doctor;
+package com.project.back_end.doctor.internal;
 
+import com.project.back_end.doctor.Doctor;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;

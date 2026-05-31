@@ -6,8 +6,8 @@ import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.doctor.Doctor;
-import com.project.back_end.doctor.DoctorController;
 import com.project.back_end.doctor.DoctorService;
+import com.project.back_end.doctor.internal.DoctorController;
 import com.project.back_end.shared.Service;
 import com.project.back_end.shared.ValidationService;
 import org.junit.jupiter.api.DisplayName;
@@ -132,7 +132,7 @@ class DoctorControllerTest {
         void validToken_returns200() throws Exception {
             LocalDateTime date = LocalDateTime.of(2024, 1, 15, 9, 0);
             when(service.extractToken(BEARER)).thenReturn(TOKEN);
-            when(doctorService.getDoctorAvailability(1L, date))
+            when(service.getDoctorAvailability(1L, date))
                     .thenReturn(List.of("09:00-10:00", "10:00-11:00"));
 
             mockMvc.perform(get("/doctor/availability/patient/1/2024-01-15T09:00:00")

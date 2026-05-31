@@ -1,8 +1,9 @@
 package com.project.back_end.appointment;
 
+import com.project.back_end.appointment.internal.AppointmentRepository;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.doctor.Doctor;
-import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.patient.Patient;
 import com.project.back_end.patient.PatientLookup;
 import com.project.back_end.shared.TokenService;
@@ -35,7 +36,7 @@ class AppointmentServiceTest {
 
     @Mock private AppointmentRepository appointmentRepository;
     @Mock private PatientLookup patientLookup;
-    @Mock private DoctorRepository doctorRepository;
+    @Mock private DoctorService doctorService;
     @Mock private TokenService tokenService;
 
     @InjectMocks
@@ -250,7 +251,7 @@ class AppointmentServiceTest {
         @BeforeEach
         void stubDoctorLookup() {
             when(tokenService.extractEmail(TOKEN)).thenReturn(DOCTOR_EMAIL);
-            when(doctorRepository.findByEmail(DOCTOR_EMAIL)).thenReturn(doctor(1L));
+            when(doctorService.findByEmail(DOCTOR_EMAIL)).thenReturn(doctor(1L));
         }
 
         @Test

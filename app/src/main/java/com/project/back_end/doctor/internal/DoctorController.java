@@ -1,5 +1,7 @@
-package com.project.back_end.doctor;
+package com.project.back_end.doctor.internal;
 
+import com.project.back_end.doctor.Doctor;
+import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.shared.AuthDTO;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.shared.Service;
@@ -46,7 +48,7 @@ public class DoctorController {
     ){
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, user);
-        return ResponseEntity.ok(Map.of("availability", doctorService.getDoctorAvailability(doctorId, date)));
+        return ResponseEntity.ok(Map.of("availability", service.getDoctorAvailability(doctorId, date)));
     }
 
     @PostMapping("/")

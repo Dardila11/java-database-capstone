@@ -1,5 +1,8 @@
-package com.project.back_end.appointment;
+package com.project.back_end.appointment.internal;
 
+import com.project.back_end.appointment.Appointment;
+import com.project.back_end.appointment.AppointmentDTO;
+import com.project.back_end.appointment.AppointmentService;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.shared.Service;
 import com.project.back_end.shared.ValidationService;

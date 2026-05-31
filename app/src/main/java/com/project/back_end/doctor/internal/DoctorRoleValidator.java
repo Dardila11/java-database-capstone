@@ -1,4 +1,4 @@
-package com.project.back_end.doctor;
+package com.project.back_end.doctor.internal;
 
 import com.project.back_end.shared.RoleValidator;
 import org.springframework.stereotype.Component;

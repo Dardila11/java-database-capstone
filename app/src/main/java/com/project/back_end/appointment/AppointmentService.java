@@ -11,13 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
+import com.project.back_end.appointment.internal.AppointmentRepository;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.doctor.Doctor;
-import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.patient.Patient;
 import com.project.back_end.patient.PatientLookup;
 import com.project.back_end.shared.TokenService;
+import com.project.back_end.shared.event.DoctorDeletedEvent;
 
 @Service
 public class AppointmentService {
@@ -26,17 +30,17 @@ public class AppointmentService {
 
   private final AppointmentRepository appointmentRepository;
   private final PatientLookup patientLookup;
-  private final DoctorRepository doctorRepository;
+  private final DoctorService doctorService;
   private final TokenService tokenService;
 
   public AppointmentService(
       AppointmentRepository appointmentRepository,
       PatientLookup patientLookup,
-      DoctorRepository doctorRepository,
+      DoctorService doctorService,
       TokenService tokenService) {
     this.appointmentRepository = appointmentRepository;
     this.patientLookup = patientLookup;
-    this.doctorRepository = doctorRepository;
+    this.doctorService = doctorService;
     this.tokenService = tokenService;
   }
 
@@ -117,7 +121,7 @@ public class AppointmentService {
   @Transactional
   public List<AppointmentDTO> getAppointments(String date, String patientName, String token) {
     String email = tokenService.extractEmail(token);
-    Doctor doctor = doctorRepository.findByEmail(email);
+    Doctor doctor = doctorService.findByEmail(email);
     Long doctorId = doctor.getId();
 
     LocalDate localDate = LocalDate.parse(date);
@@ -139,6 +143,21 @@ public class AppointmentService {
   @Transactional
   public void changeStatus(int status, long id) {
     appointmentRepository.updateStatus(status, id);
+  }
+
+  public List<LocalDateTime> getBookedTimesForDoctor(long doctorId, LocalDateTime date) {
+    LocalDateTime start = date.toLocalDate().atStartOfDay();
+    LocalDateTime end = date.toLocalDate().atTime(23, 59, 59);
+    return appointmentRepository
+        .findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end)
+        .stream()
+        .map(Appointment::getAppointmentTime)
+        .toList();
+  }
+
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  public void onDoctorDeleted(DoctorDeletedEvent event) {
+    appointmentRepository.deleteAllByDoctorId(event.doctorId());
   }
 
   @Transactional

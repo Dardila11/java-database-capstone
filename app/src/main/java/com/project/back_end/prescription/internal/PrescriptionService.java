@@ -1,6 +1,7 @@
-package com.project.back_end.prescription;
+package com.project.back_end.prescription.internal;
 
 import com.project.back_end.enums.ServiceResult;
+import com.project.back_end.prescription.Prescription;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public class PrescriptionService {
 
     private final PrescriptionRepository prescriptionRepository;
 
-    public PrescriptionService(PrescriptionRepository prescriptionRepository){
+    public PrescriptionService(PrescriptionRepository prescriptionRepository) {
         this.prescriptionRepository = prescriptionRepository;
     }
 
@@ -30,6 +31,4 @@ public class PrescriptionService {
     public List<Prescription> getPrescription(Long appointmentId) {
         return prescriptionRepository.findByAppointmentId(appointmentId);
     }
-
-
 }
