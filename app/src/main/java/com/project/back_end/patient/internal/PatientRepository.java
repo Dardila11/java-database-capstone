@@ -1,4 +1,5 @@
-package com.project.back_end.patient;
+package com.project.back_end.patient.internal;
+import com.project.back_end.patient.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

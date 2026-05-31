@@ -1,5 +1,7 @@
-package com.project.back_end.patient;
+package com.project.back_end.patient.internal;
 
+import com.project.back_end.appointment.AppointmentService;
+import com.project.back_end.patient.Patient;
 import com.project.back_end.shared.AuthDTO;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.shared.Service;
@@ -15,11 +17,14 @@ import java.util.Map;
 public class PatientController {
 
     private final PatientService patientService;
+    private final AppointmentService appointmentService;
     private final Service service;
     private final ValidationService validationService;
 
-    public PatientController(PatientService patientService, Service service, ValidationService validationService) {
+    public PatientController(PatientService patientService, AppointmentService appointmentService,
+                             Service service, ValidationService validationService) {
         this.patientService = patientService;
+        this.appointmentService = appointmentService;
         this.service = service;
         this.validationService = validationService;
     }
@@ -57,7 +62,7 @@ public class PatientController {
     ) {
         String token = service.extractToken(authHeader);
         validationService.validateToken(token, "patient"); // throws exception if not valid
-        return ResponseEntity.ok(Map.of("appointments", patientService.getPatientAppointments(id)));
+        return ResponseEntity.ok(Map.of("appointments", appointmentService.getPatientAppointments(id)));
     }
 
     @GetMapping("/filter/{condition}/{name}")

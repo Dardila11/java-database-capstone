@@ -5,7 +5,7 @@ import com.project.back_end.exceptions.InvalidTokenException;
 import com.project.back_end.doctor.Doctor;
 import com.project.back_end.doctor.DoctorRepository;
 import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.PatientRepository;
+import com.project.back_end.patient.internal.PatientRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

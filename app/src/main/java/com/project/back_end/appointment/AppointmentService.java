@@ -16,7 +16,7 @@ import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.doctor.Doctor;
 import com.project.back_end.doctor.DoctorRepository;
 import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.PatientRepository;
+import com.project.back_end.patient.PatientLookup;
 import com.project.back_end.shared.TokenService;
 
 @Service
@@ -25,17 +25,17 @@ public class AppointmentService {
   private static final Logger log = LoggerFactory.getLogger(AppointmentService.class);
 
   private final AppointmentRepository appointmentRepository;
-  private final PatientRepository patientRepository;
+  private final PatientLookup patientLookup;
   private final DoctorRepository doctorRepository;
   private final TokenService tokenService;
 
   public AppointmentService(
       AppointmentRepository appointmentRepository,
-      PatientRepository patientRepository,
+      PatientLookup patientLookup,
       DoctorRepository doctorRepository,
       TokenService tokenService) {
     this.appointmentRepository = appointmentRepository;
-    this.patientRepository = patientRepository;
+    this.patientLookup = patientLookup;
     this.doctorRepository = doctorRepository;
     this.tokenService = tokenService;
   }
@@ -61,7 +61,7 @@ public class AppointmentService {
       Appointment existing = existingOpt.get();
 
       String email = tokenService.extractEmail(token);
-      Optional<Patient> patient = patientRepository.findByEmail(email);
+      Optional<Patient> patient = patientLookup.findByEmail(email);
       if (patient.isEmpty() || !patient.get().getId().equals(existing.getPatient().getId())) {
         return ServiceResult.UNAUTHORIZED;
       }
@@ -99,7 +99,7 @@ public class AppointmentService {
       Appointment appointment = appointmentOpt.get();
 
       String email = tokenService.extractEmail(token);
-      Optional<Patient> patient = patientRepository.findByEmail(email);
+      Optional<Patient> patient = patientLookup.findByEmail(email);
       if (patient.isEmpty() || !patient.get().getId().equals(appointment.getPatient().getId())) {
         return ServiceResult.UNAUTHORIZED;
       }
@@ -139,5 +139,45 @@ public class AppointmentService {
   @Transactional
   public void changeStatus(int status, long id) {
     appointmentRepository.updateStatus(status, id);
+  }
+
+  @Transactional
+  public List<AppointmentDTO> getPatientAppointments(Long patientId) {
+    return appointmentRepository.findByPatientId(patientId)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  public List<AppointmentDTO> filterByCondition(long patientId, String condition) {
+    int status = parseConditionStatus(condition);
+    return appointmentRepository
+        .findByPatient_IdAndStatusOrderByAppointmentTimeAsc(patientId, status)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  public List<AppointmentDTO> filterByDoctor(String doctorName, long patientId) {
+    return appointmentRepository
+        .filterByDoctorNameAndPatientId(doctorName, patientId)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  public List<AppointmentDTO> filterByDoctorAndCondition(String doctorName, long patientId, String condition) {
+    int status = parseConditionStatus(condition);
+    return appointmentRepository
+        .filterByDoctorNameAndPatientIdAndStatus(doctorName, patientId, status)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  private int parseConditionStatus(String condition) {
+    if ("past".equalsIgnoreCase(condition)) return 1;
+    if ("future".equalsIgnoreCase(condition)) return 0;
+    throw new IllegalArgumentException("Invalid condition: use 'past' or 'future'");
   }
 }

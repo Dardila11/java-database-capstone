@@ -1,13 +1,13 @@
 package com.project.back_end.patient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.back_end.appointment.AppointmentService;
+import com.project.back_end.patient.internal.PatientService;
 import com.project.back_end.shared.AuthDTO;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.exceptions.InvalidTokenException;
-import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.PatientController;
-import com.project.back_end.patient.PatientService;
+import com.project.back_end.patient.internal.PatientController;
 import com.project.back_end.shared.Service;
 import com.project.back_end.shared.ValidationService;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,6 +39,7 @@ public class PatientControllerTest {
     @Autowired ObjectMapper objectMapper;
     @MockitoBean ValidationService validationService;
     @MockitoBean PatientService patientService;
+    @MockitoBean AppointmentService appointmentService;
     @MockitoBean Service service;
 
     @Nested
@@ -239,7 +239,7 @@ public class PatientControllerTest {
         @DisplayName("returns 200 with appointments list")
         void getAppointments_validToken_returns200() throws Exception {
             when(service.extractToken("Bearer mocked.jwt.token")).thenReturn("mocked.jwt.token");
-            when(patientService.getPatientAppointments(1L)).thenReturn(List.of());
+            when(appointmentService.getPatientAppointments(1L)).thenReturn(List.of());
 
             mockMvc.perform(get("/patient/1")
                             .header("Authorization", "Bearer mocked.jwt.token"))

@@ -1,14 +1,15 @@
 package com.project.back_end.shared;
 
 import com.project.back_end.appointment.AppointmentDTO;
+import com.project.back_end.appointment.AppointmentService;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.exceptions.NotFoundException;
 import com.project.back_end.doctor.Doctor;
 import com.project.back_end.doctor.DoctorRepository;
 import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.PatientRepository;
-import com.project.back_end.patient.PatientService;
+import com.project.back_end.patient.internal.PatientRepository;
+import com.project.back_end.patient.internal.PatientService;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,13 +21,16 @@ public class Service {
     private final PatientRepository patientRepository;
     private final DoctorService doctorService;
     private final PatientService patientService;
+    private final AppointmentService appointmentService;
 
-    public Service(TokenService tokenService, DoctorRepository doctorRepository, PatientRepository patientRepository, DoctorService doctorService, PatientService patientService) {
+    public Service(TokenService tokenService, DoctorRepository doctorRepository, PatientRepository patientRepository,
+                   DoctorService doctorService, PatientService patientService, AppointmentService appointmentService) {
         this.tokenService = tokenService;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
         this.doctorService = doctorService;
         this.patientService = patientService;
+        this.appointmentService = appointmentService;
     }
 
     /**
@@ -133,13 +137,13 @@ public class Service {
         boolean hasDoctorName = doctorName != null && !doctorName.isEmpty();
 
         if (hasCondition && hasDoctorName) {
-            return patientService.filterByDoctorAndCondition(doctorName, patientId, condition);
+            return appointmentService.filterByDoctorAndCondition(doctorName, patientId, condition);
         } else if (hasCondition) {
-            return patientService.filterByCondition(patientId, condition);
+            return appointmentService.filterByCondition(patientId, condition);
         } else if (hasDoctorName) {
-            return patientService.filterByDoctor(doctorName, patientId);
+            return appointmentService.filterByDoctor(doctorName, patientId);
         } else {
-            return patientService.getPatientAppointments(patientId);
+            return appointmentService.getPatientAppointments(patientId);
         }
     }
 }
