@@ -1,5 +1,6 @@
-package com.project.back_end.appointment;
+package com.project.back_end.appointment.internal;
 
+import com.project.back_end.appointment.Appointment;
 import java.time.LocalDateTime;
 import java.util.List;
 

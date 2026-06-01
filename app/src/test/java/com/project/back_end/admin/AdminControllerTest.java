@@ -2,7 +2,7 @@ package com.project.back_end.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.back_end.shared.AuthDTO;
-import com.project.back_end.admin.AdminController;
+import com.project.back_end.admin.internal.AdminController;
 import com.project.back_end.exceptions.InvalidCredentialsException;
 import com.project.back_end.shared.ValidationService;
 import org.junit.jupiter.api.DisplayName;

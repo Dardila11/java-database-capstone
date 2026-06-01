@@ -1,23 +1,15 @@
 package com.project.back_end.shared;
 
-import com.project.back_end.admin.Admin;
-import com.project.back_end.admin.AdminRepository;
-import com.project.back_end.doctor.Doctor;
-import com.project.back_end.doctor.DoctorRepository;
-import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.PatientRepository;
-import com.project.back_end.shared.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -26,24 +18,21 @@ import static org.mockito.Mockito.when;
 @DisplayName("TokenService")
 class TokenServiceTest {
 
-    // 32-byte secret satisfies HMAC-SHA256 minimum key length requirement
     private static final String TEST_SECRET = "test-secret-key-for-unit-tests-32b";
     private static final String EMAIL = "user@example.com";
 
-    @Mock
-    private AdminRepository adminRepository;
+    @Mock private RoleValidator adminValidator;
+    @Mock private RoleValidator doctorValidator;
+    @Mock private RoleValidator patientValidator;
 
-    @Mock
-    private DoctorRepository doctorRepository;
-
-    @Mock
-    private PatientRepository patientRepository;
-
-    @InjectMocks
     private TokenService tokenService;
 
     @BeforeEach
-    void injectSecret() {
+    void setUp() {
+        when(adminValidator.role()).thenReturn("admin");
+        when(doctorValidator.role()).thenReturn("doctor");
+        when(patientValidator.role()).thenReturn("patient");
+        tokenService = new TokenService(List.of(adminValidator, doctorValidator, patientValidator));
         ReflectionTestUtils.setField(tokenService, "jwtSecret", TEST_SECRET);
     }
 
@@ -58,20 +47,18 @@ class TokenServiceTest {
         @Test
         @DisplayName("returns a non-null, non-blank JWT string")
         void returnsNonBlankToken() {
-            String token = tokenService.generateToken(EMAIL);
-            assertThat(token).isNotBlank();
+            assertThat(tokenService.generateToken(EMAIL)).isNotBlank();
         }
 
         @Test
         @DisplayName("token has three dot-separated JWT segments")
         void hasThreeSegments() {
-            String token = tokenService.generateToken(EMAIL);
-            assertThat(token.split("\\.")).hasSize(3);
+            assertThat(tokenService.generateToken(EMAIL).split("\\.")).hasSize(3);
         }
 
         @Test
-        @DisplayName("different emails produce different tokens")
-        void differentEmailsProduceDifferentTokens() {
+        @DisplayName("different subjects produce different tokens")
+        void differentSubjectsProduceDifferentTokens() {
             String t1 = tokenService.generateToken("a@example.com");
             String t2 = tokenService.generateToken("b@example.com");
             assertThat(t1).isNotEqualTo(t2);
@@ -87,18 +74,17 @@ class TokenServiceTest {
     class ExtractEmail {
 
         @Test
-        @DisplayName("round-trips the subject email exactly")
+        @DisplayName("round-trips the subject exactly")
         void roundTripsEmail() {
             String token = tokenService.generateToken(EMAIL);
             assertThat(tokenService.extractEmail(token)).isEqualTo(EMAIL);
         }
 
         @Test
-        @DisplayName("round-trips an email with special characters")
+        @DisplayName("round-trips a subject with special characters")
         void roundTripsEmailWithSpecialCharacters() {
             String unusual = "user+tag@sub.domain.org";
-            String token = tokenService.generateToken(unusual);
-            assertThat(tokenService.extractEmail(token)).isEqualTo(unusual);
+            assertThat(tokenService.extractEmail(tokenService.generateToken(unusual))).isEqualTo(unusual);
         }
     }
 
@@ -118,44 +104,44 @@ class TokenServiceTest {
         }
 
         @Test
-        @DisplayName("returns true for 'admin' role when admin exists")
+        @DisplayName("returns true for 'admin' role when validator confirms subject")
         void trueForAdminRoleWhenAdminExists() {
-            when(adminRepository.findByUsername(EMAIL)).thenReturn(new Admin());
+            when(adminValidator.isValidSubject(EMAIL)).thenReturn(true);
             assertThat(tokenService.validateToken(validToken, "admin")).isTrue();
         }
 
         @Test
-        @DisplayName("returns false for 'admin' role when admin not found")
+        @DisplayName("returns false for 'admin' role when validator rejects subject")
         void falseForAdminRoleWhenAdminNotFound() {
-            when(adminRepository.findByUsername(EMAIL)).thenReturn(null);
+            when(adminValidator.isValidSubject(EMAIL)).thenReturn(false);
             assertThat(tokenService.validateToken(validToken, "admin")).isFalse();
         }
 
         @Test
-        @DisplayName("returns true for 'doctor' role when doctor exists")
+        @DisplayName("returns true for 'doctor' role when validator confirms subject")
         void trueForDoctorRoleWhenDoctorExists() {
-            when(doctorRepository.findByEmail(EMAIL)).thenReturn(new Doctor());
+            when(doctorValidator.isValidSubject(EMAIL)).thenReturn(true);
             assertThat(tokenService.validateToken(validToken, "doctor")).isTrue();
         }
 
         @Test
-        @DisplayName("returns false for 'doctor' role when doctor not found")
+        @DisplayName("returns false for 'doctor' role when validator rejects subject")
         void falseForDoctorRoleWhenDoctorNotFound() {
-            when(doctorRepository.findByEmail(EMAIL)).thenReturn(null);
+            when(doctorValidator.isValidSubject(EMAIL)).thenReturn(false);
             assertThat(tokenService.validateToken(validToken, "doctor")).isFalse();
         }
 
         @Test
-        @DisplayName("returns true for 'patient' role when patient exists")
+        @DisplayName("returns true for 'patient' role when validator confirms subject")
         void trueForPatientRoleWhenPatientExists() {
-            when(patientRepository.findByEmail(EMAIL)).thenReturn(Optional.of(new Patient()));
+            when(patientValidator.isValidSubject(EMAIL)).thenReturn(true);
             assertThat(tokenService.validateToken(validToken, "patient")).isTrue();
         }
 
         @Test
-        @DisplayName("returns false for 'patient' role when patient not found")
+        @DisplayName("returns false for 'patient' role when validator rejects subject")
         void falseForPatientRoleWhenPatientNotFound() {
-            when(patientRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+            when(patientValidator.isValidSubject(EMAIL)).thenReturn(false);
             assertThat(tokenService.validateToken(validToken, "patient")).isFalse();
         }
 
@@ -168,8 +154,7 @@ class TokenServiceTest {
         @Test
         @DisplayName("returns false for a structurally tampered token")
         void falseForTamperedToken() {
-            String tampered = validToken + "tampered";
-            assertThat(tokenService.validateToken(tampered, "admin")).isFalse();
+            assertThat(tokenService.validateToken(validToken + "tampered", "admin")).isFalse();
         }
 
         @Test
@@ -177,15 +162,12 @@ class TokenServiceTest {
         void falseForTokenSignedWithWrongSecret() {
             ReflectionTestUtils.setField(tokenService, "jwtSecret", "wrong-secret-key-for-unit-tests-32b");
             String foreignToken = tokenService.generateToken(EMAIL);
-
-            // restore original secret so verification uses the correct key
             ReflectionTestUtils.setField(tokenService, "jwtSecret", TEST_SECRET);
-
             assertThat(tokenService.validateToken(foreignToken, "admin")).isFalse();
         }
 
         @Test
-        @DisplayName("returns false for a blank / empty token string")
+        @DisplayName("returns false for a blank token string")
         void falseForBlankToken() {
             assertThat(tokenService.validateToken("", "admin")).isFalse();
         }

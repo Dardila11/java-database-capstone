@@ -1,6 +1,7 @@
-package com.project.back_end.prescription;
+package com.project.back_end.prescription.internal;
 
 import com.project.back_end.enums.ServiceResult;
+import com.project.back_end.prescription.Prescription;
 import com.project.back_end.appointment.AppointmentService;
 import com.project.back_end.shared.Service;
 import com.project.back_end.shared.ValidationService;
@@ -13,13 +14,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/prescription")
 public class PrescriptionController {
-    
+
     private final PrescriptionService prescriptionService;
     private final AppointmentService appointmentService;
     private final ValidationService validationService;
     private final Service service;
 
-    public PrescriptionController(PrescriptionService prescriptionService, AppointmentService appointmentService, ValidationService validationService, Service service) {
+    public PrescriptionController(PrescriptionService prescriptionService, AppointmentService appointmentService,
+                                  ValidationService validationService, Service service) {
         this.prescriptionService = prescriptionService;
         this.appointmentService = appointmentService;
         this.validationService = validationService;

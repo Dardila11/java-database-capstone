@@ -1,5 +1,5 @@
 
-package com.project.back_end.admin;
+package com.project.back_end.admin.internal;
 
 import com.project.back_end.shared.AuthDTO;
 import com.project.back_end.shared.ValidationService;
@@ -26,6 +26,7 @@ public class AdminController {
     public AdminController(ValidationService validationService) {
         this.validationService = validationService;
     }
+
 
     @PostMapping("/login")
     @Operation(

@@ -11,13 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
+import com.project.back_end.appointment.internal.AppointmentRepository;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.doctor.Doctor;
-import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.PatientRepository;
+import com.project.back_end.patient.PatientLookup;
 import com.project.back_end.shared.TokenService;
+import com.project.back_end.shared.event.DoctorDeletedEvent;
 
 @Service
 public class AppointmentService {
@@ -25,18 +29,18 @@ public class AppointmentService {
   private static final Logger log = LoggerFactory.getLogger(AppointmentService.class);
 
   private final AppointmentRepository appointmentRepository;
-  private final PatientRepository patientRepository;
-  private final DoctorRepository doctorRepository;
+  private final PatientLookup patientLookup;
+  private final DoctorService doctorService;
   private final TokenService tokenService;
 
   public AppointmentService(
       AppointmentRepository appointmentRepository,
-      PatientRepository patientRepository,
-      DoctorRepository doctorRepository,
+      PatientLookup patientLookup,
+      DoctorService doctorService,
       TokenService tokenService) {
     this.appointmentRepository = appointmentRepository;
-    this.patientRepository = patientRepository;
-    this.doctorRepository = doctorRepository;
+    this.patientLookup = patientLookup;
+    this.doctorService = doctorService;
     this.tokenService = tokenService;
   }
 
@@ -61,7 +65,7 @@ public class AppointmentService {
       Appointment existing = existingOpt.get();
 
       String email = tokenService.extractEmail(token);
-      Optional<Patient> patient = patientRepository.findByEmail(email);
+      Optional<Patient> patient = patientLookup.findByEmail(email);
       if (patient.isEmpty() || !patient.get().getId().equals(existing.getPatient().getId())) {
         return ServiceResult.UNAUTHORIZED;
       }
@@ -99,7 +103,7 @@ public class AppointmentService {
       Appointment appointment = appointmentOpt.get();
 
       String email = tokenService.extractEmail(token);
-      Optional<Patient> patient = patientRepository.findByEmail(email);
+      Optional<Patient> patient = patientLookup.findByEmail(email);
       if (patient.isEmpty() || !patient.get().getId().equals(appointment.getPatient().getId())) {
         return ServiceResult.UNAUTHORIZED;
       }
@@ -117,7 +121,7 @@ public class AppointmentService {
   @Transactional
   public List<AppointmentDTO> getAppointments(String date, String patientName, String token) {
     String email = tokenService.extractEmail(token);
-    Doctor doctor = doctorRepository.findByEmail(email);
+    Doctor doctor = doctorService.findByEmail(email);
     Long doctorId = doctor.getId();
 
     LocalDate localDate = LocalDate.parse(date);
@@ -139,5 +143,60 @@ public class AppointmentService {
   @Transactional
   public void changeStatus(int status, long id) {
     appointmentRepository.updateStatus(status, id);
+  }
+
+  public List<LocalDateTime> getBookedTimesForDoctor(long doctorId, LocalDateTime date) {
+    LocalDateTime start = date.toLocalDate().atStartOfDay();
+    LocalDateTime end = date.toLocalDate().atTime(23, 59, 59);
+    return appointmentRepository
+        .findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end)
+        .stream()
+        .map(Appointment::getAppointmentTime)
+        .toList();
+  }
+
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  public void onDoctorDeleted(DoctorDeletedEvent event) {
+    appointmentRepository.deleteAllByDoctorId(event.doctorId());
+  }
+
+  @Transactional
+  public List<AppointmentDTO> getPatientAppointments(Long patientId) {
+    return appointmentRepository.findByPatientId(patientId)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  public List<AppointmentDTO> filterByCondition(long patientId, String condition) {
+    int status = parseConditionStatus(condition);
+    return appointmentRepository
+        .findByPatient_IdAndStatusOrderByAppointmentTimeAsc(patientId, status)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  public List<AppointmentDTO> filterByDoctor(String doctorName, long patientId) {
+    return appointmentRepository
+        .filterByDoctorNameAndPatientId(doctorName, patientId)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  public List<AppointmentDTO> filterByDoctorAndCondition(String doctorName, long patientId, String condition) {
+    int status = parseConditionStatus(condition);
+    return appointmentRepository
+        .filterByDoctorNameAndPatientIdAndStatus(doctorName, patientId, status)
+        .stream()
+        .map(AppointmentDTO::from)
+        .collect(Collectors.toList());
+  }
+
+  private int parseConditionStatus(String condition) {
+    if ("past".equalsIgnoreCase(condition)) return 1;
+    if ("future".equalsIgnoreCase(condition)) return 0;
+    throw new IllegalArgumentException("Invalid condition: use 'past' or 'future'");
   }
 }

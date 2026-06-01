@@ -1,14 +1,11 @@
 package com.project.back_end.appointment;
 
-import com.project.back_end.appointment.Appointment;
-import com.project.back_end.appointment.AppointmentDTO;
-import com.project.back_end.appointment.AppointmentRepository;
-import com.project.back_end.appointment.AppointmentService;
+import com.project.back_end.appointment.internal.AppointmentRepository;
 import com.project.back_end.enums.ServiceResult;
 import com.project.back_end.doctor.Doctor;
-import com.project.back_end.doctor.DoctorRepository;
+import com.project.back_end.doctor.DoctorService;
 import com.project.back_end.patient.Patient;
-import com.project.back_end.patient.PatientRepository;
+import com.project.back_end.patient.PatientLookup;
 import com.project.back_end.shared.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,8 +35,8 @@ class AppointmentServiceTest {
     private static final String DOCTOR_EMAIL = "doctor@example.com";
 
     @Mock private AppointmentRepository appointmentRepository;
-    @Mock private PatientRepository patientRepository;
-    @Mock private DoctorRepository doctorRepository;
+    @Mock private PatientLookup patientLookup;
+    @Mock private DoctorService doctorService;
     @Mock private TokenService tokenService;
 
     @InjectMocks
@@ -120,7 +117,7 @@ class AppointmentServiceTest {
 
             when(appointmentRepository.findById(10L)).thenReturn(Optional.of(appt));
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
-            when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(requester));
+            when(patientLookup.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(requester));
 
             assertThat(appointmentService.cancelAppointment(10L, TOKEN)).isEqualTo(ServiceResult.UNAUTHORIZED);
         }
@@ -133,7 +130,7 @@ class AppointmentServiceTest {
 
             when(appointmentRepository.findById(10L)).thenReturn(Optional.of(appt));
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
-            when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.empty());
+            when(patientLookup.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.empty());
 
             assertThat(appointmentService.cancelAppointment(10L, TOKEN)).isEqualTo(ServiceResult.UNAUTHORIZED);
         }
@@ -147,7 +144,7 @@ class AppointmentServiceTest {
 
             when(appointmentRepository.findById(10L)).thenReturn(Optional.of(appt));
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
-            when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
+            when(patientLookup.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
 
             ServiceResult result = appointmentService.cancelAppointment(10L, TOKEN);
 
@@ -182,7 +179,7 @@ class AppointmentServiceTest {
 
             when(appointmentRepository.findById(10L)).thenReturn(Optional.of(existing));
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
-            when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(requester));
+            when(patientLookup.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(requester));
 
             assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(ServiceResult.UNAUTHORIZED);
         }
@@ -199,7 +196,7 @@ class AppointmentServiceTest {
 
             when(appointmentRepository.findById(10L)).thenReturn(Optional.of(existing));
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
-            when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
+            when(patientLookup.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
 
             assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(ServiceResult.CONFLICT);
         }
@@ -218,7 +215,7 @@ class AppointmentServiceTest {
 
             when(appointmentRepository.findById(10L)).thenReturn(Optional.of(existing));
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
-            when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
+            when(patientLookup.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
 
             assertThat(appointmentService.updateAppointment(request, TOKEN)).isEqualTo(ServiceResult.CONFLICT);
         }
@@ -235,7 +232,7 @@ class AppointmentServiceTest {
 
             when(appointmentRepository.findById(10L)).thenReturn(Optional.of(existing));
             when(tokenService.extractEmail(TOKEN)).thenReturn(PATIENT_EMAIL);
-            when(patientRepository.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
+            when(patientLookup.findByEmail(PATIENT_EMAIL)).thenReturn(Optional.of(owner));
             when(appointmentRepository.save(existing)).thenReturn(existing);
 
             ServiceResult result = appointmentService.updateAppointment(request, TOKEN);
@@ -254,7 +251,7 @@ class AppointmentServiceTest {
         @BeforeEach
         void stubDoctorLookup() {
             when(tokenService.extractEmail(TOKEN)).thenReturn(DOCTOR_EMAIL);
-            when(doctorRepository.findByEmail(DOCTOR_EMAIL)).thenReturn(doctor(1L));
+            when(doctorService.findByEmail(DOCTOR_EMAIL)).thenReturn(doctor(1L));
         }
 
         @Test
