@@ -68,19 +68,6 @@ Controllers delegate auth to `ValidationService`, business logic to the appropri
 - **`Service`** (the generic bean) — cross-entity helpers: `extractToken`, `filterDoctor`, `validateAppointment` (returns int code), `filterPatient`.
 - **`AppointmentService`**, **`DoctorService`**, **`PatientService`**, **`PrescriptionService`** — domain-specific CRUD and filtering.
 
-### Integer Return Code Convention
-
-Several service methods return `int` codes instead of throwing exceptions:
-
-| Code | Meaning |
-|---|---|
-| `1` | Success |
-| `0` | Conflict / failure |
-| `-1` | Not found |
-| `-2` | Unauthorized |
-
-Controllers switch on these codes to produce appropriate HTTP responses.
-
 ### Authentication
 
 - JWT is passed in the `Authorization: Bearer <token>` header for REST endpoints.
