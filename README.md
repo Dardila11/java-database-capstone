@@ -1,6 +1,7 @@
 # Smart Clinic Management System
 
 A full-stack web application for managing clinic operations, exposing a Spring Boot REST API backed by MySQL and MongoDB, with a static HTML/JS frontend and Thymeleaf-rendered dashboards for admins, doctors, and patients.
+Use spring modulith
 
 ---
 
